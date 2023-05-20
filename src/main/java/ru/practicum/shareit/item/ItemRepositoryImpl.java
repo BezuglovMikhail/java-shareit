@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@Repository
 public class ItemRepositoryImpl implements ItemRepository {
 
     private final HashMap<Long, List<Item>> items = new HashMap<>();
@@ -28,13 +30,18 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public Item findByIdItem(long itemId) {
-        //for (List<Item> itemsFindById : items.values()) {
-        //  itemsFindById.stream().forEach(n -> itemId);
-        //}
-
-        return items.values().stream()
-                .forEach(n -> n.stream().filter(x -> Objects.equals(x.getIdItem(), itemId)))
-                ;
+        //Item findItem;
+        for (List<Item> itemsFindById : items.values()) {
+          for (Item item : itemsFindById) {
+              if (item.getIdItem() == itemId) {
+                  return item;
+              }
+          }
+        }
+        return null;
+        //return items.values().stream()
+          //      .forEach(n -> n.stream().filter(x -> Objects.equals(x.getIdItem(), itemId)))
+            //    ;
     }
 
     @Override
