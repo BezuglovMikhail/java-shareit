@@ -26,9 +26,9 @@ public class UserController {
         return userService.save(user);
     }
 
-    @PutMapping
-    public User update(@Valid @RequestBody User user) {
-        return userService.updateUser(user);
+    @PatchMapping("/{userId}")
+    public User update(@Valid @RequestBody User user, long userId) {
+        return userService.updateUser(user, userId);
     }
 
     @GetMapping("/{userId}")

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,4 +14,6 @@ public interface UserRepository {
     void deleteUser(long userId);
 
     User updateUser(User user);
+
+    HashMap<Long, User> getUsers();
 }

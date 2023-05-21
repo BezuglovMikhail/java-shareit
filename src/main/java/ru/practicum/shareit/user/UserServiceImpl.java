@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.IncorrectParameterException;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +14,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> save(User user) {
-        return repository.save(user);
+        if (user.getEmail() == null || !user.getEmail().contains("@")) {
+            throw new IncorrectParameterException("email");
+        }
+
+        if (validator(user.getEmail())) {
+            return repository.save(user);
+        } else {
+            throw new ValidationException("Пользователь с email = " + user.getEmail() + " уже существует.");
+        }
     }
 
     @Override
@@ -32,7 +41,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(User user) {
-        return repository.updateUser(user);
+    public User updateUser(User user, long userId) {
+        if (repository.getUsers().containsKey(userId)) {
+            return repository.updateUser(user);
+        } else {
+            throw new UserNotFoundException("Пользователя с id = " + user.getId() + " не существует.");
+        }
+
+    }
+
+    public boolean validator(String email) {
+        for (User oldUser : repository.getUsers().values()) {
+            if (oldUser.getEmail().equals(email)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

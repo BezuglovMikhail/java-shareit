@@ -48,14 +48,19 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User updateUser(User user) {
-        if (users.containsKey(user.getId())) {
+        //if (users.containsKey(user.getId())) {
             return users.put(user.getId(), user);
-        } else {
-            return null;
-        }
+       // } else {
+            //throw new UserNotFoundException("Пользователя с id = " + user.getId() +" не существует.");
+       // }
     }
 
     public long generateId() {
         return ++idUser;
+    }
+
+    @Override
+    public HashMap<Long, User> getUsers() {
+        return users;
     }
 }
