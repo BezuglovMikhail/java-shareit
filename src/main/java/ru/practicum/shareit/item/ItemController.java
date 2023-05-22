@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.model.Item;
 
@@ -17,13 +18,15 @@ import java.util.Optional;
 public class ItemController {
     private final ItemService itemService;
 
+   // public static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
+
     @GetMapping("/{userId}")
     public List<Item> getAllItemByIdUser(long userId) {
         return itemService.findAllItemByIdUser(userId);
     }
 
     @PostMapping
-    public Optional<Item> saveUser(@RequestBody Item item, long userId) {
+    public Optional<Item> saveUser(@RequestBody Item item, @RequestHeader("X-Sharer-User-Id") long userId) {
         return itemService.save(item, userId);
     }
 

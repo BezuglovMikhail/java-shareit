@@ -13,7 +13,7 @@ public interface UserRepository {
 
     void deleteUser(long userId);
 
-    User updateUser(User user);
+    User updateUser(User user, long userId);
 
     HashMap<Long, User> getUsers();
 }

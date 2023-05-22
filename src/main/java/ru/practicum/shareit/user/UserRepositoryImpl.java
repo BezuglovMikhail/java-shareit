@@ -47,9 +47,28 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User updateUser(User user) {
+    public User updateUser(User user, long userId) {
+        //if (user.getEmail() == null && user.getName() == null) {
+            //throw new IncorrectParameterException("email & name");
+        //} else {
+            User updateUser = new User();
+            updateUser.setId(userId);
+            if (user.getEmail() != null && user.getName() != null) {
+                updateUser.setEmail(user.getEmail());
+                updateUser.setName(user.getName());
+            } else if (user.getEmail() == null && user.getName() != null) {
+                updateUser.setEmail(getUsers().get(userId).getEmail());
+                updateUser.setName(user.getName());
+            } else if (user.getName() == null && user.getEmail() != null) {
+                updateUser.setEmail(user.getEmail());
+                updateUser.setName(getUsers().get(userId).getName());
+           }
+            users.put(userId, updateUser);
+
+
+        //User userUpdate = new User(userId, user.getEmail(), user.getName());
         //if (users.containsKey(user.getId())) {
-            return users.put(user.getId(), user);
+            return users.get(userId);
        // } else {
             //throw new UserNotFoundException("Пользователя с id = " + user.getId() +" не существует.");
        // }

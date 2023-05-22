@@ -14,15 +14,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> save(User user) {
-        if (user.getEmail() == null || !user.getEmail().contains("@")) {
-            throw new IncorrectParameterException("email");
-        }
-
-        if (validator(user.getEmail())) {
-            return repository.save(user);
-        } else {
-            throw new ValidationException("Пользователь с email = " + user.getEmail() + " уже существует.");
-        }
+        validatorEmail(user.getEmail());
+        validatorRepeatEmail(user.getEmail());
+        return repository.save(user);
     }
 
     @Override
@@ -43,19 +37,26 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(User user, long userId) {
         if (repository.getUsers().containsKey(userId)) {
-            return repository.updateUser(user);
+            if (!repository.getUsers().get(userId).getEmail().equals(user.getEmail())) {
+                validatorRepeatEmail(user.getEmail());
+            }
+            return repository.updateUser(user, userId);
         } else {
             throw new UserNotFoundException("Пользователя с id = " + user.getId() + " не существует.");
         }
-
     }
 
-    public boolean validator(String email) {
+    public void validatorRepeatEmail(String email) {
         for (User oldUser : repository.getUsers().values()) {
             if (oldUser.getEmail().equals(email)) {
-                return false;
+                throw new ValidationException("Пользователь с email = " + email + " уже существует.");
             }
         }
-        return true;
+    }
+
+    public void validatorEmail(String email) {
+        if (email == null || !email.contains("@")) {
+            throw new IncorrectParameterException("email");
+        }
     }
 }
