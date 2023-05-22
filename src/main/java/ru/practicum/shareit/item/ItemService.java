@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ItemService {
-    Optional<Item> save(Item item, long userId);
+   Item save(Item item, long userId);
 
     List<Item> findAllItemByIdUser(long userId);
 
-    Item findByIdItem(long itemId);
+    Item findById(long itemId);
 
     void deleteItem(long itemId, long userId);
 
-    Optional<Item> updateItem(Item item, long userId);
+    Item updateItem(Item item, long userId, Long itemId);
 }

@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.model.Item;
 
@@ -18,30 +17,28 @@ import java.util.Optional;
 public class ItemController {
     private final ItemService itemService;
 
-   // public static final String X_SHARER_USER_ID = "X-Sharer-User-Id";
-
     @GetMapping("/{userId}")
-    public List<Item> getAllItemByIdUser(long userId) {
+    public List<Item> getAllItemByIdUser(@PathVariable long userId) {
         return itemService.findAllItemByIdUser(userId);
     }
 
     @PostMapping
-    public Optional<Item> saveUser(@RequestBody Item item, @RequestHeader("X-Sharer-User-Id") long userId) {
+    public Item saveUser(@Valid @RequestBody Item item, @RequestHeader("X-Sharer-User-Id") long userId) {
         return itemService.save(item, userId);
     }
 
-    @PutMapping
-    public Optional<Item> update(@Valid @RequestBody Item item, long userId) {
-        return itemService.updateItem(item, userId);
+    @PatchMapping("/{itemId}")
+    public Item update(@Valid @RequestBody Item item, @RequestHeader("X-Sharer-User-Id") long userId, @PathVariable Long itemId) {
+        return itemService.updateItem(item, userId, itemId);
     }
 
     @GetMapping("/{itemId}")
     public Item findById(@PathVariable long itemId) {
-        return itemService.findByIdItem(itemId);
+        return itemService.findById(itemId);
     }
 
     @DeleteMapping("/{itemId}")
-    public void deleteUser(@PathVariable long itemId, long userId) {
+    public void deleteUser(@PathVariable long itemId, @RequestHeader("X-Sharer-User-Id") long userId) {
         itemService.deleteItem(itemId, userId);
     }
 }

@@ -42,15 +42,12 @@ public class UserRepositoryImpl implements UserRepository {
         if (users.containsKey(userId)) {
             users.remove(userId);
         } else {
-            //throw ;
+            throw new UserNotFoundException("Пользователь с id = " + userId + " не найден.") ;
         }
     }
 
     @Override
     public User updateUser(User user, long userId) {
-        //if (user.getEmail() == null && user.getName() == null) {
-            //throw new IncorrectParameterException("email & name");
-        //} else {
             User updateUser = new User();
             updateUser.setId(userId);
             if (user.getEmail() != null && user.getName() != null) {
@@ -64,14 +61,7 @@ public class UserRepositoryImpl implements UserRepository {
                 updateUser.setName(getUsers().get(userId).getName());
            }
             users.put(userId, updateUser);
-
-
-        //User userUpdate = new User(userId, user.getEmail(), user.getName());
-        //if (users.containsKey(user.getId())) {
             return users.get(userId);
-       // } else {
-            //throw new UserNotFoundException("Пользователя с id = " + user.getId() +" не существует.");
-       // }
     }
 
     public long generateId() {

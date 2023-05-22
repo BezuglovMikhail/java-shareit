@@ -10,15 +10,16 @@ import javax.validation.constraints.NotNull;
  */
 @Data
 public class Item {
-    private long idItem;
+    private Long id;
 
-    @NotNull
-    @NotBlank
+    //@NotNull
+    //@NotBlank
     private String name;
 
-    @NotNull
-    @NotBlank
+    //@NotNull
+    //@NotBlank
     private String description;
 
-    private boolean available;
+    //@NotNull
+    private Boolean available;
 }
