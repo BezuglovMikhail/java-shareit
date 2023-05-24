@@ -26,11 +26,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByIdUser(long userId) {
+        validatorUserId(userId);
         return repository.findByIdUser(userId);
     }
 
     @Override
     public void deleteUser(long userId) {
+        validatorUserId(userId);
         repository.deleteUser(userId);
     }
 
@@ -57,6 +59,12 @@ public class UserServiceImpl implements UserService {
     public void validatorEmail(String email) {
         if (email == null || !email.contains("@")) {
             throw new IncorrectParameterException("email");
+        }
+    }
+
+    public void validatorUserId(long userId) {
+        if (!repository.getUsers().containsKey(userId)) {
+            throw new UserNotFoundException("Пользователя с id = " + userId + " не существует.");
         }
     }
 }

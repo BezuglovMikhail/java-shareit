@@ -12,9 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class User {
     private long id;
-    //@Email
-    //@NotNull
-    //@NotBlank
+
     private String email;
 
     private String name;

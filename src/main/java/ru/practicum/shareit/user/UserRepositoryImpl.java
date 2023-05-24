@@ -30,38 +30,30 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User findByIdUser(long userId) {
-        if (users.containsKey(userId)) {
-            return users.get(userId);
-        } else {
-            return null;
-        }
+        return users.get(userId);
     }
 
     @Override
     public void deleteUser(long userId) {
-        if (users.containsKey(userId)) {
-            users.remove(userId);
-        } else {
-            throw new UserNotFoundException("Пользователь с id = " + userId + " не найден.") ;
-        }
+        users.remove(userId);
     }
 
     @Override
     public User updateUser(User user, long userId) {
-            User updateUser = new User();
-            updateUser.setId(userId);
-            if (user.getEmail() != null && user.getName() != null) {
-                updateUser.setEmail(user.getEmail());
-                updateUser.setName(user.getName());
-            } else if (user.getEmail() == null && user.getName() != null) {
-                updateUser.setEmail(getUsers().get(userId).getEmail());
-                updateUser.setName(user.getName());
-            } else if (user.getName() == null && user.getEmail() != null) {
-                updateUser.setEmail(user.getEmail());
-                updateUser.setName(getUsers().get(userId).getName());
-           }
-            users.put(userId, updateUser);
-            return users.get(userId);
+        User updateUser = new User();
+        updateUser.setId(userId);
+        if (user.getEmail() != null && user.getName() != null) {
+            updateUser.setEmail(user.getEmail());
+            updateUser.setName(user.getName());
+        } else if (user.getEmail() == null && user.getName() != null) {
+            updateUser.setEmail(getUsers().get(userId).getEmail());
+            updateUser.setName(user.getName());
+        } else if (user.getName() == null && user.getEmail() != null) {
+            updateUser.setEmail(user.getEmail());
+            updateUser.setName(getUsers().get(userId).getName());
+        }
+        users.put(userId, updateUser);
+        return users.get(userId);
     }
 
     public long generateId() {

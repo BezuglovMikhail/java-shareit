@@ -2,17 +2,23 @@ package ru.practicum.shareit.item;
 
 import ru.practicum.shareit.item.model.Item;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 public interface ItemRepository {
-   Item save(Item item, long userId);
+    Item save(Item item, Long userId);
 
-    List<Item> findAllItemsByIdUser(long userId);
+    List<Item> findAllItemsByIdUser(Long userId);
 
-    Item findById(long itemId);
+    Item findById(Long itemId);
 
-    void deleteItem(long userId, long itemId);
+    void deleteItem(Long userId, Long itemId);
 
-    Item updateItem(Item item, long userId, Long itemId);
+    Item updateItem(Item item, Long userId, Long itemId);
+
+    public List<Item> searchItems(String text);
+
+    public HashMap<Long, List<Long>> getUsersItemsId();
+
+    public HashMap<Long, Item> getItems();
 }

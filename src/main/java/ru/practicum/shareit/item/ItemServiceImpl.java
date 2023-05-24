@@ -7,8 +7,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserNotFoundException;
 import ru.practicum.shareit.user.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,45 +19,58 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
 
     @Override
-    public Item save(Item item, long userId) {
+    public Item save(Item item, Long userId) {
         validatorUserId(userId);
         validatorItem(item);
         return itemRepository.save(item, userId);
     }
 
     @Override
-    public List<Item> findAllItemByIdUser(long userId) {
+    public List<Item> findAllItemByIdUser(Long userId) {
         validatorUserId(userId);
         return itemRepository.findAllItemsByIdUser(userId);
     }
 
     @Override
-    public Item findById(long itemId) {
+    public Item findById(Long itemId) {
         return itemRepository.findById(itemId);
     }
 
     @Override
-    public void deleteItem(long itemId, long userId) {
+    public void deleteItem(Long itemId, Long userId) {
         validatorUserId(userId);
         itemRepository.deleteItem(itemId, userId);
     }
 
     @Override
-    public Item updateItem(Item item, long userId, Long itemId) {
+    public Item updateItem(Item item, Long userId, Long itemId) {
         validatorUserId(userId);
-        //validatorItemId(item.getId());
+        validatorItemId(itemId, userId);
         return itemRepository.updateItem(item, userId, itemId);
     }
 
-    public void validatorUserId(long userId) {
+    @Override
+    public List<Item> searchItems(String text) {
+        if (text.isBlank() || text == null) {
+            List<Item> itemsClear = new ArrayList<>();
+            return itemsClear;
+        }
+        text = text.toLowerCase();
+        return itemRepository.searchItems(text);
+    }
+
+    public void validatorUserId(Long userId) {
         if (!userRepository.getUsers().containsKey(userId)) {
             throw new UserNotFoundException("Пользователя с id = " + userId + " не найден.");
         }
     }
 
-    public void validatorItemId(Long itemId) {
-        if (itemId == null) {
-            throw new ItemNotFoundException("Пользователя с id = " + itemId + " не найден.");
+    public void validatorItemId(Long itemId, Long userId) {
+        if (!itemRepository.getUsersItemsId().containsKey(userId)) {
+            throw new UserNotFoundException("Пользователь с " + userId + " не найден.");
+        }
+        if (itemId != null && !itemRepository.getUsersItemsId().get(userId).contains(itemId)) {
+            throw new ItemNotFoundException("Вещь с id = " + itemId + " не найдена.");
         }
     }
 
