@@ -18,4 +18,5 @@ public interface UserRepository {
     User updateUser(UserDto userDto, long userId);
 
     HashMap<Long, User> getUsers();
+    void setIdUser(long idUser);
 }

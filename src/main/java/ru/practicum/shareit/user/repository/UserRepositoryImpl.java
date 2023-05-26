@@ -73,4 +73,9 @@ public class UserRepositoryImpl implements UserRepository {
     public HashMap<Long, User> getUsers() {
         return users;
     }
+
+    @Override
+    public void setIdUser(long idUser) {
+        this.idUser = 0;
+    }
 }
