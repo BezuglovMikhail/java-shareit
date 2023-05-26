@@ -1,14 +1,19 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.IncorrectParameterException;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserNotFoundException;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.item.exeption.ItemNotFoundException;
+import ru.practicum.shareit.user.exeption.UserNotFoundException;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static ru.practicum.shareit.item.dto.ItemMapper.toItemDto;
 
 @Service
 @RequiredArgsConstructor
@@ -19,21 +24,22 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
 
     @Override
-    public Item save(Item item, Long userId) {
+    public ItemDto save(ItemDto itemDto, Long userId) {
         validatorUserId(userId);
-        validatorItem(item);
-        return itemRepository.save(item, userId);
+        validatorItem(itemDto);
+        return toItemDto(itemRepository.save(itemDto, userId));
     }
 
     @Override
-    public List<Item> findAllItemByIdUser(Long userId) {
+    public List<ItemDto> findAllItemByIdUser(Long userId) {
         validatorUserId(userId);
-        return itemRepository.findAllItemsByIdUser(userId);
+        return itemRepository.findAllItemsByIdUser(userId).stream()
+                .map(x -> toItemDto(x)).collect(Collectors.toList());
     }
 
     @Override
-    public Item findById(Long itemId) {
-        return itemRepository.findById(itemId);
+    public ItemDto findById(Long itemId) {
+        return toItemDto(itemRepository.findById(itemId));
     }
 
     @Override
@@ -43,20 +49,21 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item updateItem(Item item, Long userId, Long itemId) {
+    public ItemDto updateItem(ItemDto itemDto, Long userId, Long itemId) {
         validatorUserId(userId);
         validatorItemId(itemId, userId);
-        return itemRepository.updateItem(item, userId, itemId);
+        return toItemDto(itemRepository.updateItem(itemDto, userId, itemId));
     }
 
     @Override
-    public List<Item> searchItems(String text) {
+    public List<ItemDto> searchItems(String text) {
         if (text.isBlank() || text == null) {
-            List<Item> itemsClear = new ArrayList<>();
+            List<ItemDto> itemsClear = new ArrayList<>();
             return itemsClear;
         }
         text = text.toLowerCase();
-        return itemRepository.searchItems(text);
+        return itemRepository.searchItems(text).stream()
+                .map(x -> toItemDto(x)).collect(Collectors.toList());
     }
 
     public void validatorUserId(Long userId) {
@@ -74,14 +81,14 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    public void validatorItem(Item item) {
-        if (item.getAvailable() == null) {
+    public void validatorItem(ItemDto itemDto) {
+        if (itemDto.getAvailable() == null) {
             throw new IncorrectParameterException("available");
         }
-        if (item.getName() == null || item.getName().isBlank()) {
+        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
             throw new IncorrectParameterException("name");
         }
-        if (item.getDescription() == null || item.getDescription().isBlank()) {
+        if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
             throw new IncorrectParameterException("description");
         }
     }

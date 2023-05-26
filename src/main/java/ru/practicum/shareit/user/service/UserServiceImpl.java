@@ -1,11 +1,18 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.IncorrectParameterException;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.exeption.UserNotFoundException;
+import ru.practicum.shareit.user.exeption.ValidationException;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static ru.practicum.shareit.user.dto.UserMapper.toUserDto;
 
 @Service
 @RequiredArgsConstructor
@@ -13,21 +20,23 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repository;
 
     @Override
-    public Optional<User> save(User user) {
-        validatorEmail(user.getEmail());
-        validatorRepeatEmail(user.getEmail());
-        return repository.save(user);
+    public UserDto save(UserDto userDto) {
+        validatorEmail(userDto.getEmail());
+        validatorRepeatEmail(userDto.getEmail());
+        return toUserDto(repository.save(userDto));
     }
 
     @Override
-    public List<User> findAllUsers() {
-        return repository.findAllUsers();
+    public List<UserDto> findAllUsers() {
+        return repository.findAllUsers()
+                .stream()
+                .map(x -> toUserDto(x)).collect(Collectors.toList());
     }
 
     @Override
-    public User findByIdUser(long userId) {
+    public UserDto findByIdUser(long userId) {
         validatorUserId(userId);
-        return repository.findByIdUser(userId);
+        return toUserDto(repository.findByIdUser(userId));
     }
 
     @Override
@@ -37,14 +46,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(User user, long userId) {
+    public UserDto updateUser(UserDto userDto, long userId) {
         if (repository.getUsers().containsKey(userId)) {
-            if (!repository.getUsers().get(userId).getEmail().equals(user.getEmail())) {
-                validatorRepeatEmail(user.getEmail());
+            if (!repository.getUsers().get(userId).getEmail().equals(userDto.getEmail())) {
+                validatorRepeatEmail(userDto.getEmail());
             }
-            return repository.updateUser(user, userId);
+            return toUserDto(repository.updateUser(userDto, userId));
         } else {
-            throw new UserNotFoundException("Пользователя с id = " + user.getId() + " не существует.");
+            throw new UserNotFoundException("Пользователя с id = " + userId + " не существует.");
         }
     }
 

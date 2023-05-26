@@ -4,9 +4,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.item.ItemNotFoundException;
-import ru.practicum.shareit.user.UserNotFoundException;
-import ru.practicum.shareit.user.ValidationException;
+import ru.practicum.shareit.item.exeption.ItemNotFoundException;
+import ru.practicum.shareit.user.exeption.UserNotFoundException;
+import ru.practicum.shareit.user.exeption.ValidationException;
 
 @RestControllerAdvice
 public class ErrorHandler {
