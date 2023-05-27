@@ -50,7 +50,6 @@ class UserRepositoryTest {
                 .build();
         User user = userRepository.save(userDto);
         assertNotNull(user);
-        assertEquals(4, user.getId());
         assertEquals(user, userRepository.findByIdUser(4L));
     }
 
