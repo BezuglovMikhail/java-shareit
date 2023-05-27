@@ -39,7 +39,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto findById(Long itemId) {
-        return toItemDto(itemRepository.findById(itemId));
+        if (itemRepository.getItems().containsKey(itemId)) {
+            return toItemDto(itemRepository.findById(itemId));
+        } else {
+            throw new ItemNotFoundException("Вещь с id = " + itemId + " не найдена.");
+        }
     }
 
     @Override
@@ -50,7 +54,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(ItemDto itemDto, Long userId, Long itemId) {
-        validatorUserId(userId);
         validatorItemId(itemId, userId);
         return toItemDto(itemRepository.updateItem(itemDto, userId, itemId));
     }
@@ -66,6 +69,16 @@ public class ItemServiceImpl implements ItemService {
                 .map(x -> toItemDto(x)).collect(Collectors.toList());
     }
 
+    @Override
+    public UserRepository getUserRepository() {
+        return userRepository;
+    }
+
+    @Override
+    public ItemRepository getItemRepository() {
+        return itemRepository;
+    }
+
     public void validatorUserId(Long userId) {
         if (!userRepository.getUsers().containsKey(userId)) {
             throw new UserNotFoundException("Пользователя с id = " + userId + " не найден.");
@@ -74,10 +87,10 @@ public class ItemServiceImpl implements ItemService {
 
     public void validatorItemId(Long itemId, Long userId) {
         if (!itemRepository.getUsersItemsId().containsKey(userId)) {
-            throw new UserNotFoundException("Пользователь с " + userId + " не найден.");
+            throw new UserNotFoundException("У пользователя с id = " + userId + " нет вещей.");
         }
         if (itemId != null && !itemRepository.getUsersItemsId().get(userId).contains(itemId)) {
-            throw new ItemNotFoundException("Вещь с id = " + itemId + " не найдена.");
+            throw new ItemNotFoundException("Вещь с id = " + itemId + " у пользователя с id = " + userId + " не найдена.");
         }
     }
 

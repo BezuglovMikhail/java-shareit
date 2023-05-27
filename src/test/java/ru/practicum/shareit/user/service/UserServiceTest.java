@@ -9,7 +9,6 @@ import ru.practicum.shareit.IncorrectParameterException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.exeption.UserNotFoundException;
 import ru.practicum.shareit.user.exeption.ValidationException;
-import ru.practicum.shareit.user.model.User;
 
 import java.io.IOException;
 

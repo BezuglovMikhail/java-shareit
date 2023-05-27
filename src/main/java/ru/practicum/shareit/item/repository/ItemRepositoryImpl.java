@@ -13,7 +13,7 @@ import static ru.practicum.shareit.item.dto.ItemMapper.toItem;
 @Slf4j
 public class ItemRepositoryImpl implements ItemRepository {
 
-    private final HashMap<Long, List<Long>> usersItemsId = new HashMap<>();
+    private HashMap<Long, List<Long>> usersItemsId = new HashMap<>();
 
     private HashMap<Long, Item> items = new HashMap<>();
     private long id = 0;
@@ -116,5 +116,15 @@ public class ItemRepositoryImpl implements ItemRepository {
     @Override
     public HashMap<Long, List<Long>> getUsersItemsId() {
         return usersItemsId;
+    }
+
+    @Override
+    public HashMap<Long, Item> getItems() {
+        return items;
+    }
+
+    @Override
+    public void setId(long id) {
+        this.id = id;
     }
 }

@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public interface UserRepository {
-   User save(UserDto userDto);
+    User save(UserDto userDto);
 
     List<User> findAllUsers();
 
@@ -18,5 +18,6 @@ public interface UserRepository {
     User updateUser(UserDto userDto, long userId);
 
     HashMap<Long, User> getUsers();
+
     void setIdUser(long idUser);
 }
