@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserServiceTest {
 
     private final UserService userService;
+
+    @AfterEach
+    void clear() {
+        userService.getUserRepository().getUsers().clear();
+        userService.getUserRepository().setIdUser(0);
+    }
 
     @Test
     void saveTrue() {

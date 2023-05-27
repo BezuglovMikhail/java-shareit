@@ -57,6 +57,12 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public UserRepository getUserRepository() {
+        return repository;
+    }
+
+
     public void validatorRepeatEmail(String email) {
         for (User oldUser : repository.getUsers().values()) {
             if (oldUser.getEmail().equals(email)) {
