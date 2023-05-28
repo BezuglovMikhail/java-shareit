@@ -7,6 +7,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.user.dto.UserMapper.toUser;
@@ -16,12 +17,13 @@ import static ru.practicum.shareit.user.dto.UserMapper.toUser;
 public class UserRepositoryImpl implements UserRepository {
 
     private final HashMap<Long, User> users = new HashMap<>();
-    private long idUser = 0;
+    private AtomicLong idUser = new AtomicLong(0);
+    //private long idUser = 0;
 
     @Override
     public User save(UserDto userDto) {
         User newUser = toUser(userDto);
-        newUser.setId(generateId());
+        newUser.setId(idUser.incrementAndGet());
         users.put(newUser.getId(), newUser);
         log.info("Пользователь с id = {} добавлен", newUser.getId());
         return users.get(newUser.getId());
@@ -35,38 +37,34 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User findByIdUser(long userId) {
+    public User findByIdUser(Long userId) {
         log.info("Найден пользователь c id = {} ", userId);
         return users.get(userId);
     }
 
     @Override
-    public void deleteUser(long userId) {
+    public void deleteUser(Long userId) {
         users.remove(userId);
         log.info("Пользователь c id = {} удален", userId);
     }
 
     @Override
-    public User updateUser(UserDto userDto, long userId) {
+    public User updateUser(UserDto userDto, Long userId) {
         User updateUser = new User();
         updateUser.setId(userId);
-        if (userDto.getEmail() != null && userDto.getName() != null) {
-            updateUser.setEmail(userDto.getEmail());
+        if (userDto.getName() != null) {
             updateUser.setName(userDto.getName());
-        } else if (userDto.getEmail() == null && userDto.getName() != null) {
-            updateUser.setEmail(getUsers().get(userId).getEmail());
-            updateUser.setName(userDto.getName());
-        } else if (userDto.getName() == null && userDto.getEmail() != null) {
-            updateUser.setEmail(userDto.getEmail());
+        } else {
             updateUser.setName(getUsers().get(userId).getName());
+        }
+        if (userDto.getEmail() != null) {
+            updateUser.setEmail(userDto.getEmail());
+        } else {
+            updateUser.setEmail(getUsers().get(userId).getEmail());
         }
         users.put(userId, updateUser);
         log.info("Пользователь c id = {} обновлен", userId);
         return users.get(userId);
-    }
-
-    public long generateId() {
-        return ++idUser;
     }
 
     @Override
@@ -75,7 +73,7 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public void setIdUser(long idUser) {
-        this.idUser = 0;
+    public void setIdUser(AtomicLong idUser) {
+        this.idUser = idUser;
     }
 }

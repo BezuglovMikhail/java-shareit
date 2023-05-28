@@ -7,11 +7,12 @@ import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.IncorrectParameterException;
+import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.exeption.UserNotFoundException;
 import ru.practicum.shareit.user.exeption.ValidationException;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,7 +25,7 @@ class UserServiceTest {
     @AfterEach
     void clear() {
         userService.getUserRepository().getUsers().clear();
-        userService.getUserRepository().setIdUser(0);
+        userService.getUserRepository().setIdUser(new AtomicLong(0));
     }
 
     @Test
@@ -93,7 +94,7 @@ class UserServiceTest {
 
     @Test
     void findByIdUser() {
-        UserNotFoundException ex = assertThrows(UserNotFoundException.class, new Executable() {
+        NotFoundException ex = assertThrows(NotFoundException.class, new Executable() {
             @Override
             public void execute() throws IOException {
                 userService.findByIdUser(1000);
@@ -105,7 +106,7 @@ class UserServiceTest {
 
     @Test
     void deleteUser() {
-        UserNotFoundException ex = assertThrows(UserNotFoundException.class, new Executable() {
+        NotFoundException ex = assertThrows(NotFoundException.class, new Executable() {
             @Override
             public void execute() throws IOException {
                 userService.deleteUser(1000);
@@ -145,7 +146,7 @@ class UserServiceTest {
 
         assertEquals("Пользователь с email = " + userDtoTest2.getEmail() + " уже существует.", ex.getMessage());
 
-        UserNotFoundException ex2 = assertThrows(UserNotFoundException.class, new Executable() {
+        NotFoundException ex2 = assertThrows(NotFoundException.class, new Executable() {
             @Override
             public void execute() throws IOException {
                 userService.updateUser(userDtoTest2, 1000);

@@ -6,6 +6,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static ru.practicum.shareit.item.dto.ItemMapper.toItem;
 
@@ -16,12 +17,12 @@ public class ItemRepositoryImpl implements ItemRepository {
     private HashMap<Long, List<Long>> usersItemsId = new HashMap<>();
 
     private HashMap<Long, Item> items = new HashMap<>();
-    private long id = 0;
+    private AtomicLong id = new AtomicLong(0);
 
     @Override
     public Item save(ItemDto itemDto, Long userId) {
         Item item = toItem(itemDto);
-        item.setId(generateId());
+        item.setId(id.incrementAndGet());
         List<Long> newListId = new ArrayList<>();
         if (usersItemsId.containsKey(userId)) {
             newListId.addAll(usersItemsId.get(userId));
@@ -75,42 +76,24 @@ public class ItemRepositoryImpl implements ItemRepository {
     public Item updateItem(ItemDto itemDto, Long userId, Long itemId) {
         Item itemUpdate = new Item();
         itemUpdate.setId(itemId);
-        if (itemDto.getDescription() != null && itemDto.getName() != null && itemDto.getAvailable() != null) {
-            itemUpdate.setDescription(itemDto.getDescription());
+        if (itemDto.getName() != null) {
             itemUpdate.setName(itemDto.getName());
-            itemUpdate.setAvailable(itemDto.getAvailable());
-        } else if (itemDto.getDescription() == null && itemDto.getName() != null && itemDto.getAvailable() != null) {
-            itemUpdate.setDescription(items.get(itemId).getDescription());
-            itemUpdate.setName(itemDto.getName());
-            itemUpdate.setAvailable(itemDto.getAvailable());
-        } else if (itemDto.getDescription() != null && itemDto.getName() == null && itemDto.getAvailable() != null) {
-            itemUpdate.setDescription(itemDto.getDescription());
+        } else {
             itemUpdate.setName(items.get(itemId).getName());
-            itemUpdate.setAvailable(itemDto.getAvailable());
-        } else if (itemDto.getDescription() != null && itemDto.getName() != null && itemDto.getAvailable() == null) {
+        }
+        if (itemDto.getDescription() != null) {
             itemUpdate.setDescription(itemDto.getDescription());
-            itemUpdate.setName(itemDto.getName());
-            itemUpdate.setAvailable(items.get(itemId).getAvailable());
-        } else if (itemDto.getDescription() == null && itemDto.getName() != null && itemDto.getAvailable() == null) {
+        } else {
             itemUpdate.setDescription(items.get(itemId).getDescription());
-            itemUpdate.setName(itemDto.getName());
-            itemUpdate.setAvailable(items.get(itemId).getAvailable());
-        } else if (itemDto.getDescription() != null && itemDto.getName() == null && itemDto.getAvailable() == null) {
-            itemUpdate.setDescription(itemDto.getDescription());
-            itemUpdate.setName(items.get(itemId).getName());
-            itemUpdate.setAvailable(items.get(itemId).getAvailable());
-        } else if (itemDto.getDescription() == null && itemDto.getName() == null && itemDto.getAvailable() != null) {
-            itemUpdate.setDescription(items.get(itemId).getDescription());
-            itemUpdate.setName(items.get(itemId).getName());
+        }
+        if (itemDto.getAvailable() != null) {
             itemUpdate.setAvailable(itemDto.getAvailable());
+        } else {
+            itemUpdate.setAvailable(items.get(itemId).getAvailable());
         }
         items.put(itemId, itemUpdate);
         log.info("Обновлена вещь с id = {}.", itemId);
         return items.get(itemId);
-    }
-
-    public Long generateId() {
-        return ++id;
     }
 
     @Override
@@ -124,7 +107,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public void setId(long id) {
+    public void setId(AtomicLong id) {
         this.id = id;
     }
 }

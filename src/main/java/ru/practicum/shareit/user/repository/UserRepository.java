@@ -5,19 +5,20 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 public interface UserRepository {
     User save(UserDto userDto);
 
     List<User> findAllUsers();
 
-    User findByIdUser(long userId);
+    User findByIdUser(Long userId);
 
-    void deleteUser(long userId);
+    void deleteUser(Long userId);
 
-    User updateUser(UserDto userDto, long userId);
+    User updateUser(UserDto userDto, Long userId);
 
     HashMap<Long, User> getUsers();
 
-    void setIdUser(long idUser);
+    void setIdUser(AtomicLong idUser);
 }

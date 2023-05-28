@@ -8,14 +8,14 @@ import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.IncorrectParameterException;
+import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.exeption.ItemNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.exeption.UserNotFoundException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -45,9 +45,9 @@ class ItemServiceTest {
     void clear() {
         itemService.getItemRepository().getItems().clear();
         itemService.getItemRepository().getUsersItemsId().clear();
-        itemService.getItemRepository().setId(0);
+        itemService.getItemRepository().setId(new AtomicLong(0));
         itemService.getUserRepository().getUsers().clear();
-        itemService.getUserRepository().setIdUser(0);
+        itemService.getUserRepository().setIdUser(new AtomicLong(0));
     }
 
     @Test
@@ -97,14 +97,14 @@ class ItemServiceTest {
                 .description("шуруповерт + аккумулятор")
                 .build();
 
-        UserNotFoundException ex = assertThrows(UserNotFoundException.class, new Executable() {
+        NotFoundException ex = assertThrows(NotFoundException.class, new Executable() {
             @Override
             public void execute() throws IOException {
                 itemService.save(itemDtoTest, 1000L);
             }
         });
 
-        assertEquals("Пользователя с id = 1000 не найден.", ex.getMessage());
+        assertEquals("Пользователя с id = 1000 нет.", ex.getMessage());
 
         IncorrectParameterException ex1 = assertThrows(IncorrectParameterException.class, new Executable() {
             @Override
@@ -164,14 +164,14 @@ class ItemServiceTest {
 
     @Test
     void findAllItemByIdUserFalse() {
-        UserNotFoundException ex = assertThrows(UserNotFoundException.class, new Executable() {
+        NotFoundException ex = assertThrows(NotFoundException.class, new Executable() {
             @Override
             public void execute() throws IOException {
                 itemService.findAllItemByIdUser(1000L);
             }
         });
 
-        assertEquals("Пользователя с id = 1000 не найден.", ex.getMessage());
+        assertEquals("Пользователя с id = 1000 нет.", ex.getMessage());
     }
 
     @Test
@@ -211,7 +211,7 @@ class ItemServiceTest {
                 .available(false)
                 .build();
 
-        ItemNotFoundException ex = assertThrows(ItemNotFoundException.class, new Executable() {
+        NotFoundException ex = assertThrows(NotFoundException.class, new Executable() {
             @Override
             public void execute() throws IOException {
                 itemService.findById(1000L);
@@ -223,14 +223,14 @@ class ItemServiceTest {
 
     @Test
     void deleteItem() {
-        UserNotFoundException ex = assertThrows(UserNotFoundException.class, new Executable() {
+        NotFoundException ex = assertThrows(NotFoundException.class, new Executable() {
             @Override
             public void execute() throws IOException {
                 itemService.findAllItemByIdUser(1000L);
             }
         });
 
-        assertEquals("Пользователя с id = 1000 не найден.", ex.getMessage());
+        assertEquals("Пользователя с id = 1000 нет.", ex.getMessage());
     }
 
     @Test
@@ -261,7 +261,7 @@ class ItemServiceTest {
                 .description("Есть ударный режим без сверл")
                 .build();
 
-        UserNotFoundException ex = assertThrows(UserNotFoundException.class, new Executable() {
+        NotFoundException ex = assertThrows(NotFoundException.class, new Executable() {
             @Override
             public void execute() throws IOException {
                 itemService.updateItem(itemDtoTest4, 3L, 1L);
@@ -270,7 +270,7 @@ class ItemServiceTest {
 
         assertEquals("У пользователя с id = " + 3 + " нет вещей.", ex.getMessage());
 
-        ItemNotFoundException ex2 = assertThrows(ItemNotFoundException.class, new Executable() {
+        NotFoundException ex2 = assertThrows(NotFoundException.class, new Executable() {
             @Override
             public void execute() throws IOException {
                 itemService.updateItem(itemDtoTest4, 2L, 1L);

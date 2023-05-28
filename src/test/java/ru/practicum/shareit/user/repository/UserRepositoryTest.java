@@ -11,6 +11,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,7 +40,7 @@ class UserRepositoryTest {
     @AfterEach
     void clear() {
         userRepository.getUsers().clear();
-        userRepository.setIdUser(0);
+        userRepository.setIdUser(new AtomicLong(0));
     }
 
     @Test
@@ -107,8 +108,8 @@ class UserRepositoryTest {
                 .name("name4")
                 .build();
 
-        assertEquals(userTest1, userRepository.findByIdUser(2));
-        assertEquals(userTest2, userRepository.findByIdUser(4));
+        assertEquals(userTest1, userRepository.findByIdUser(2L));
+        assertEquals(userTest2, userRepository.findByIdUser(4L));
     }
 
     @Test
@@ -130,14 +131,14 @@ class UserRepositoryTest {
                         .name("name4")
                         .build()));
 
-        userRepository.deleteUser(2);
-        userRepository.deleteUser(3);
+        userRepository.deleteUser(2L);
+        userRepository.deleteUser(3L);
         List<User> users = userRepository.findAllUsers();
 
         assertEquals(2, users.size());
         assertEquals(usersTest, users);
 
-        userRepository.deleteUser(4);
+        userRepository.deleteUser(4L);
         usersTest.remove(1);
         List<User> users2 = userRepository.findAllUsers();
 

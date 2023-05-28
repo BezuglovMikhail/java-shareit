@@ -5,6 +5,7 @@ import ru.practicum.shareit.item.model.Item;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 public interface ItemRepository {
     Item save(ItemDto itemDto, Long userId);
@@ -23,5 +24,5 @@ public interface ItemRepository {
 
     HashMap<Long, Item> getItems();
 
-    void setId(long id);
+    void setId(AtomicLong id);
 }

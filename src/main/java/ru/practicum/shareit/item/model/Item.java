@@ -17,4 +17,15 @@ public class Item {
     private String description;
 
     private Boolean available;
+
+    private Long owner;
+
+    private String request;
+
+    public Item(Long id, String name, String description, Boolean available) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.available = available;
+    }
 }

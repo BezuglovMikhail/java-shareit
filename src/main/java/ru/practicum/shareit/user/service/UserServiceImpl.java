@@ -1,10 +1,11 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.IncorrectParameterException;
+import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.exeption.UserNotFoundException;
 import ru.practicum.shareit.user.exeption.ValidationException;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -16,6 +17,7 @@ import static ru.practicum.shareit.user.dto.UserMapper.toUserDto;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
 
@@ -53,7 +55,8 @@ public class UserServiceImpl implements UserService {
             }
             return toUserDto(repository.updateUser(userDto, userId));
         } else {
-            throw new UserNotFoundException("Пользователя с id = " + userId + " не существует.");
+            log.info("Пользователя с id = {} нет", userId);
+            throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
         }
     }
 
@@ -66,6 +69,7 @@ public class UserServiceImpl implements UserService {
     public void validatorRepeatEmail(String email) {
         for (User oldUser : repository.getUsers().values()) {
             if (oldUser.getEmail().equals(email)) {
+                log.info("Пользователя с email = {} уже существует", email);
                 throw new ValidationException("Пользователь с email = " + email + " уже существует.");
             }
         }
@@ -73,13 +77,15 @@ public class UserServiceImpl implements UserService {
 
     public void validatorEmail(String email) {
         if (email == null || !email.contains("@")) {
+            log.info("Ошибка в поле: email = {}", email);
             throw new IncorrectParameterException("email");
         }
     }
 
     public void validatorUserId(long userId) {
         if (!repository.getUsers().containsKey(userId)) {
-            throw new UserNotFoundException("Пользователя с id = " + userId + " не существует.");
+            log.info("Пользователя с id = {} нет", userId);
+            throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
         }
     }
 }

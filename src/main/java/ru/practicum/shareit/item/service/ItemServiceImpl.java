@@ -1,12 +1,12 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.IncorrectParameterException;
+import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.item.exeption.ItemNotFoundException;
-import ru.practicum.shareit.user.exeption.UserNotFoundException;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.ArrayList;
@@ -17,6 +17,7 @@ import static ru.practicum.shareit.item.dto.ItemMapper.toItemDto;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
@@ -42,7 +43,8 @@ public class ItemServiceImpl implements ItemService {
         if (itemRepository.getItems().containsKey(itemId)) {
             return toItemDto(itemRepository.findById(itemId));
         } else {
-            throw new ItemNotFoundException("Вещь с id = " + itemId + " не найдена.");
+            log.info("Вещь с id = {} не найдена", itemId);
+            throw new NotFoundException("Вещь с id = " + itemId + " не найдена.");
         }
     }
 
@@ -81,27 +83,33 @@ public class ItemServiceImpl implements ItemService {
 
     public void validatorUserId(Long userId) {
         if (!userRepository.getUsers().containsKey(userId)) {
-            throw new UserNotFoundException("Пользователя с id = " + userId + " не найден.");
+            log.info("Пользователя с id = {} нет", userId);
+            throw new NotFoundException("Пользователя с id = " + userId + " нет.");
         }
     }
 
     public void validatorItemId(Long itemId, Long userId) {
         if (!itemRepository.getUsersItemsId().containsKey(userId)) {
-            throw new UserNotFoundException("У пользователя с id = " + userId + " нет вещей.");
+            log.info("У пользователя с id = {} нет вещей.", userId);
+            throw new NotFoundException("У пользователя с id = " + userId + " нет вещей.");
         }
         if (itemId != null && !itemRepository.getUsersItemsId().get(userId).contains(itemId)) {
-            throw new ItemNotFoundException("Вещь с id = " + itemId + " у пользователя с id = " + userId + " не найдена.");
+            log.info("Вещь с id = {} у пользователя с id = {}  не найдена.", itemId, userId);
+            throw new NotFoundException("Вещь с id = " + itemId + " у пользователя с id = " + userId + " не найдена.");
         }
     }
 
     public void validatorItem(ItemDto itemDto) {
         if (itemDto.getAvailable() == null) {
+            log.info("Поле available - отсутствует");
             throw new IncorrectParameterException("available");
         }
         if (itemDto.getName() == null || itemDto.getName().isBlank()) {
+            log.info("Поле name - не может отсутствовать или быть пустым");
             throw new IncorrectParameterException("name");
         }
         if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
+            log.info("Поле description - не может отсутствовать или быть пустым");
             throw new IncorrectParameterException("description");
         }
     }

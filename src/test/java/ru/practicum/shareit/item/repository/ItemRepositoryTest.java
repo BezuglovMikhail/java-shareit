@@ -11,6 +11,7 @@ import ru.practicum.shareit.item.model.Item;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -45,7 +46,7 @@ class ItemRepositoryTest {
     void clear() {
         itemRepository.getItems().clear();
         itemRepository.getUsersItemsId().clear();
-        itemRepository.setId(0);
+        itemRepository.setId(new AtomicLong(0));
     }
 
     @Test
