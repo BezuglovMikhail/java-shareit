@@ -18,7 +18,6 @@ public class UserRepositoryImpl implements UserRepository {
 
     private final HashMap<Long, User> users = new HashMap<>();
     private AtomicLong idUser = new AtomicLong(0);
-    //private long idUser = 0;
 
     @Override
     public User save(UserDto userDto) {

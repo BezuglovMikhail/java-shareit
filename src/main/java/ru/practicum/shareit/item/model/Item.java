@@ -28,4 +28,12 @@ public class Item {
         this.description = description;
         this.available = available;
     }
+
+    public Item(Long id, String name, String description, Boolean available, Long owner) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.available = available;
+        this.owner = owner;
+    }
 }

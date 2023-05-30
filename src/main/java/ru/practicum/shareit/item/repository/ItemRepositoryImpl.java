@@ -7,15 +7,13 @@ import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.item.dto.ItemMapper.toItem;
 
 @Repository
 @Slf4j
 public class ItemRepositoryImpl implements ItemRepository {
-
-    private HashMap<Long, List<Long>> usersItemsId = new HashMap<>();
-
     private HashMap<Long, Item> items = new HashMap<>();
     private AtomicLong id = new AtomicLong(0);
 
@@ -23,12 +21,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     public Item save(ItemDto itemDto, Long userId) {
         Item item = toItem(itemDto);
         item.setId(id.incrementAndGet());
-        List<Long> newListId = new ArrayList<>();
-        if (usersItemsId.containsKey(userId)) {
-            newListId.addAll(usersItemsId.get(userId));
-        }
-        newListId.add(item.getId());
-        usersItemsId.put(userId, newListId);
+        item.setOwner(userId);
         items.put(item.getId(), item);
         log.info("Добавлена вещь с id = {} пользователя с id = {}", item.getId(), userId);
         return items.get(item.getId());
@@ -36,10 +29,9 @@ public class ItemRepositoryImpl implements ItemRepository {
 
     @Override
     public List<Item> findAllItemsByIdUser(Long userId) {
-        List<Item> itemsByIdUser = new ArrayList<>();
-        for (Long itemId : usersItemsId.get(userId)) {
-            itemsByIdUser.add(items.get(itemId));
-        }
+        List<Item> itemsByIdUser = items.values().stream()
+                .filter(x -> x.getOwner() == userId)
+                .collect(Collectors.toList());
         log.info("Найдены вещи пользователя с id = {} - {} шт.", userId, itemsByIdUser.size());
         return itemsByIdUser;
     }
@@ -76,6 +68,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     public Item updateItem(ItemDto itemDto, Long userId, Long itemId) {
         Item itemUpdate = new Item();
         itemUpdate.setId(itemId);
+        itemUpdate.setOwner(userId);
         if (itemDto.getName() != null) {
             itemUpdate.setName(itemDto.getName());
         } else {
@@ -94,11 +87,6 @@ public class ItemRepositoryImpl implements ItemRepository {
         items.put(itemId, itemUpdate);
         log.info("Обновлена вещь с id = {}.", itemId);
         return items.get(itemId);
-    }
-
-    @Override
-    public HashMap<Long, List<Long>> getUsersItemsId() {
-        return usersItemsId;
     }
 
     @Override

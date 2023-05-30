@@ -44,7 +44,6 @@ class ItemServiceTest {
     @AfterEach
     void clear() {
         itemService.getItemRepository().getItems().clear();
-        itemService.getItemRepository().getUsersItemsId().clear();
         itemService.getItemRepository().setId(new AtomicLong(0));
         itemService.getUserRepository().getUsers().clear();
         itemService.getUserRepository().setIdUser(new AtomicLong(0));

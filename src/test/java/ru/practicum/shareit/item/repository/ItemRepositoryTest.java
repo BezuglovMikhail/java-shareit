@@ -45,7 +45,6 @@ class ItemRepositoryTest {
     @AfterEach
     void clear() {
         itemRepository.getItems().clear();
-        itemRepository.getUsersItemsId().clear();
         itemRepository.setId(new AtomicLong(0));
     }
 
@@ -93,18 +92,21 @@ class ItemRepositoryTest {
                         .name("Отвертка")
                         .description("Шлицевая отвертка")
                         .available(true)
+                        .owner(1L)
                         .build(),
                 Item.builder()
                         .id(2L)
                         .name("Отвертка")
                         .description("Крестовая отвертка")
                         .available(false)
+                        .owner(1L)
                         .build(),
                 Item.builder()
                         .id(5L)
                         .name("Перфоратор")
                         .description("Есть ударный режим и набор сверл по бетону")
                         .available(false)
+                        .owner(1L)
                         .build()
         ));
 
@@ -114,6 +116,7 @@ class ItemRepositoryTest {
                         .name("Молоток")
                         .description("Молоток с гвоздодером")
                         .available(true)
+                        .owner(3L)
                         .build()
         ));
 
@@ -145,6 +148,7 @@ class ItemRepositoryTest {
                 .name("Отвертка")
                 .description("Шлицевая отвертка")
                 .available(true)
+                .owner(1L)
                 .build();
 
         Item itemAfterSave1 = itemRepository.save(itemTest, 3L);
@@ -201,18 +205,21 @@ class ItemRepositoryTest {
                         .name("Отвертка супер мощная")
                         .description("Шлицевая отвертка")
                         .available(true)
+                        .owner(1L)
                         .build(),
                 Item.builder()
                         .id(2L)
                         .name("Отвертка")
                         .description("Крестовая отвертка")
                         .available(true)
+                        .owner(1L)
                         .build(),
                 Item.builder()
                         .id(5L)
                         .name("Перфоратор+")
                         .description("Есть ударный режим, без сверл")
                         .available(true)
+                        .owner(1L)
                         .build()
         ));
 
@@ -256,6 +263,7 @@ class ItemRepositoryTest {
                         .name("Электрическая отвертка")
                         .description("Отвертка + набор бит")
                         .available(true)
+                        .owner(3L)
                         .build(),
 
                 Item.builder()
@@ -263,6 +271,7 @@ class ItemRepositoryTest {
                         .name("Перфоратор")
                         .description("Есть ударный режим, отвертка и набор сверл по бетону")
                         .available(true)
+                        .owner(1L)
                         .build()
         ));
 
@@ -272,18 +281,21 @@ class ItemRepositoryTest {
                         .name("Отвертка")
                         .description("Шлицевая отвертка")
                         .available(true)
+                        .owner(1L)
                         .build(),
                 Item.builder()
                         .id(3L)
                         .name("Аккумуляторный шуруповерт")
                         .description("шуруповерт + аккумулятор")
                         .available(true)
+                        .owner(2L)
                         .build(),
                 Item.builder()
                         .id(4L)
                         .name("Электрическая отвертка")
                         .description("Отвертка + набор бит")
                         .available(true)
+                        .owner(3L)
                         .build(),
 
                 Item.builder()
@@ -291,6 +303,7 @@ class ItemRepositoryTest {
                         .name("Перфоратор")
                         .description("Есть ударный режим, отвертка и набор сверл по бетону")
                         .available(true)
+                        .owner(1L)
                         .build()
         ));
 

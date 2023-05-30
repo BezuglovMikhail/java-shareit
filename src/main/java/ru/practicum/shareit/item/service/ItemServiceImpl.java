@@ -89,11 +89,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     public void validatorItemId(Long itemId, Long userId) {
-        if (!itemRepository.getUsersItemsId().containsKey(userId)) {
+        if (itemRepository.getItems().values().stream()
+                .filter(x -> x.getOwner() == userId)
+                .collect(Collectors.toList()).isEmpty()) {
             log.info("У пользователя с id = {} нет вещей.", userId);
             throw new NotFoundException("У пользователя с id = " + userId + " нет вещей.");
         }
-        if (itemId != null && !itemRepository.getUsersItemsId().get(userId).contains(itemId)) {
+        if (itemId != null && itemRepository.getItems().get(itemId).getOwner() != userId) {
             log.info("Вещь с id = {} у пользователя с id = {}  не найдена.", itemId, userId);
             throw new NotFoundException("Вещь с id = " + itemId + " у пользователя с id = " + userId + " не найдена.");
         }
