@@ -20,8 +20,6 @@ public interface ItemRepository {
 
     List<Item> searchItems(String text);
 
-    //HashMap<Long, List<Long>> getUsersItemsId();
-
     HashMap<Long, Item> getItems();
 
     void setId(AtomicLong id);

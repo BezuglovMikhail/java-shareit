@@ -30,7 +30,7 @@ public class ItemRepositoryImpl implements ItemRepository {
     @Override
     public List<Item> findAllItemsByIdUser(Long userId) {
         List<Item> itemsByIdUser = items.values().stream()
-                .filter(x -> x.getOwner() == userId)
+                .filter(x -> x.getOwner().equals(userId))
                 .collect(Collectors.toList());
         log.info("Найдены вещи пользователя с id = {} - {} шт.", userId, itemsByIdUser.size());
         return itemsByIdUser;
