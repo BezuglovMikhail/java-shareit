@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.IncorrectParameterException;
 import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -11,11 +12,12 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
-import static ru.practicum.shareit.user.dto.UserMapper.toUserDto;
+import static ru.practicum.shareit.user.dto.UserMapper.*;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
@@ -25,35 +27,36 @@ public class UserServiceImpl implements UserService {
     public UserDto save(UserDto userDto) {
         validatorEmail(userDto.getEmail());
         validatorRepeatEmail(userDto.getEmail());
-        return toUserDto(repository.save(userDto));
+        User user = repository.save(toUser(userDto));
+        return toUserDto(user);
     }
 
     @Override
     public List<UserDto> findAllUsers() {
-        return repository.findAllUsers()
-                .stream()
-                .map(x -> toUserDto(x)).collect(Collectors.toList());
+        List<User> users = repository.findAll();
+        return mapToUserDto(users);
     }
 
     @Override
     public UserDto findByIdUser(long userId) {
         validatorUserId(userId);
-        return toUserDto(repository.findByIdUser(userId));
+        return toUserDto(repository.findById(userId).get());
     }
 
     @Override
     public void deleteUser(long userId) {
         validatorUserId(userId);
-        repository.deleteUser(userId);
+        repository.deleteById(userId);
     }
 
     @Override
     public UserDto updateUser(UserDto userDto, long userId) {
-        if (repository.getUsers().containsKey(userId)) {
-            if (!repository.getUsers().get(userId).getEmail().equals(userDto.getEmail())) {
+        Optional<User> user = repository.findById(userId);
+        if (user.isEmpty()) {
+            if (!user.get().getEmail().equals(userDto.getEmail())) {
                 validatorRepeatEmail(userDto.getEmail());
             }
-            return toUserDto(repository.updateUser(userDto, userId));
+            return toUserDto(repository.save(toUser(userDto)));
         } else {
             log.info("Пользователя с id = {} нет", userId);
             throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
@@ -67,11 +70,9 @@ public class UserServiceImpl implements UserService {
 
 
     public void validatorRepeatEmail(String email) {
-        for (User oldUser : repository.getUsers().values()) {
-            if (oldUser.getEmail().equals(email)) {
-                log.info("Пользователя с email = {} уже существует", email);
-                throw new ValidationException("Пользователь с email = " + email + " уже существует.");
-            }
+        if (repository.findAllByEmailContainingIgnoreCase(email).isEmpty()) {
+            log.info("Пользователя с email = {} уже существует", email);
+            throw new ValidationException("Пользователь с email = " + email + " уже существует.");
         }
     }
 
@@ -83,7 +84,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public void validatorUserId(long userId) {
-        if (!repository.getUsers().containsKey(userId)) {
+        if (repository.findAllByIdContainingIgnoreCase(userId).isEmpty()) {
             log.info("Пользователя с id = {} нет", userId);
             throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
         }

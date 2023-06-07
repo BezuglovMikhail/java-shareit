@@ -13,11 +13,11 @@ import static ru.practicum.shareit.item.dto.ItemMapper.toItem;
 
 @Repository
 @Slf4j
-public class ItemRepositoryImpl implements ItemRepository {
+public class ItemRepositoryImpl {
     private HashMap<Long, Item> items = new HashMap<>();
     private AtomicLong id = new AtomicLong(0);
 
-    @Override
+   // @Override
     public Item save(ItemDto itemDto, Long userId) {
         Item item = toItem(itemDto);
         item.setId(id.incrementAndGet());
@@ -27,7 +27,7 @@ public class ItemRepositoryImpl implements ItemRepository {
         return items.get(item.getId());
     }
 
-    @Override
+    //@Override
     public List<Item> findAllItemsByIdUser(Long userId) {
         List<Item> itemsByIdUser = items.values().stream()
                 .filter(x -> x.getOwner().equals(userId))
@@ -36,14 +36,14 @@ public class ItemRepositoryImpl implements ItemRepository {
         return itemsByIdUser;
     }
 
-    @Override
+   // @Override
     public Item findById(Long itemId) {
         Item findItem = items.get(itemId);
         log.info("Найдена вещь с id = {}.", itemId);
         return findItem;
     }
 
-    @Override
+    //@Override
     public List<Item> searchItems(String text) {
         List<Item> itemsSearch = new ArrayList<>();
         for (Item item : items.values()) {
@@ -58,13 +58,13 @@ public class ItemRepositoryImpl implements ItemRepository {
         return itemsSearch;
     }
 
-    @Override
+   // @Override
     public void deleteItem(Long userId, Long itemId) {
         items.remove(itemId);
         log.info("Удалена вещь с id = {}.", itemId);
     }
 
-    @Override
+    //@Override
     public Item updateItem(ItemDto itemDto, Long userId, Long itemId) {
         Item itemUpdate = new Item();
         itemUpdate.setId(itemId);
@@ -89,12 +89,12 @@ public class ItemRepositoryImpl implements ItemRepository {
         return items.get(itemId);
     }
 
-    @Override
+    //@Override
     public HashMap<Long, Item> getItems() {
         return items;
     }
 
-    @Override
+    //@Override
     public void setId(AtomicLong id) {
         this.id = id;
     }

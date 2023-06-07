@@ -14,12 +14,12 @@ import static ru.practicum.shareit.user.dto.UserMapper.toUser;
 
 @Repository
 @Slf4j
-public class UserRepositoryImpl implements UserRepository {
+public class UserRepositoryImpl  {
 
     private final HashMap<Long, User> users = new HashMap<>();
     private AtomicLong idUser = new AtomicLong(0);
 
-    @Override
+    //@Override
     public User save(UserDto userDto) {
         User newUser = toUser(userDto);
         newUser.setId(idUser.incrementAndGet());
@@ -28,26 +28,26 @@ public class UserRepositoryImpl implements UserRepository {
         return users.get(newUser.getId());
     }
 
-    @Override
+    //@Override
     public List<User> findAllUsers() {
         List<User> allUsers = users.values().stream().collect(Collectors.toList());
         log.info("Список пользователей получен. Длина = {}", allUsers.size());
         return allUsers;
     }
 
-    @Override
+    //@Override
     public User findByIdUser(Long userId) {
         log.info("Найден пользователь c id = {} ", userId);
         return users.get(userId);
     }
 
-    @Override
+   // @Override
     public void deleteUser(Long userId) {
         users.remove(userId);
         log.info("Пользователь c id = {} удален", userId);
     }
 
-    @Override
+   // @Override
     public User updateUser(UserDto userDto, Long userId) {
         User updateUser = new User();
         updateUser.setId(userId);
@@ -66,12 +66,12 @@ public class UserRepositoryImpl implements UserRepository {
         return users.get(userId);
     }
 
-    @Override
+    //@Override
     public HashMap<Long, User> getUsers() {
         return users;
     }
 
-    @Override
+   // @Override
     public void setIdUser(AtomicLong idUser) {
         this.idUser = idUser;
     }
