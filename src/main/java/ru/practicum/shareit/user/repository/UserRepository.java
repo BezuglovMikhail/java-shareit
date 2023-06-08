@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    List<UserEmail> findAllByEmailContainingIgnoreCase(String emailSearch);
+    List<UserEmail> findAllByEmail(String emailSearch);
 
-    List<UserId> findAllByIdContainingIgnoreCase(Long idSearch);
+    List<UserId> findAllById(Long idSearch);
 }

@@ -1,7 +1,7 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.IncorrectParameterException;
@@ -17,11 +17,16 @@ import java.util.Optional;
 import static ru.practicum.shareit.user.dto.UserMapper.*;
 
 @Service
-@Transactional(readOnly = true)
-@RequiredArgsConstructor
+//@Transactional(readOnly = true)
 @Slf4j
 public class UserServiceImpl implements UserService {
+
+    @Autowired
     private final UserRepository repository;
+
+    public UserServiceImpl(UserRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public UserDto save(UserDto userDto) {
@@ -39,22 +44,37 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto findByIdUser(long userId) {
-        validatorUserId(userId);
-        return toUserDto(repository.findById(userId).get());
+        //validatorUserId(userId);
+        Optional<User> user = repository.findById(userId);
+        if (user.isPresent()) {
+            return toUserDto(user.get());
+        } else {
+            log.info("Пользователя с id = {} нет", userId);
+            throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
+        }
     }
 
     @Override
     public void deleteUser(long userId) {
-        validatorUserId(userId);
+        findByIdUser(userId);
         repository.deleteById(userId);
     }
 
     @Override
     public UserDto updateUser(UserDto userDto, long userId) {
+        if (userDto.getId() == null) {
+           userDto.setId(userId);
+        }
         Optional<User> user = repository.findById(userId);
-        if (user.isEmpty()) {
+        if (user.isPresent()) {
             if (!user.get().getEmail().equals(userDto.getEmail())) {
                 validatorRepeatEmail(userDto.getEmail());
+            }
+            if (userDto.getName() == null) {
+                userDto.setName(user.get().getName());
+            }
+            if (userDto.getEmail() == null) {
+                userDto.setEmail(user.get().getEmail());
             }
             return toUserDto(repository.save(toUser(userDto)));
         } else {
@@ -70,7 +90,7 @@ public class UserServiceImpl implements UserService {
 
 
     public void validatorRepeatEmail(String email) {
-        if (repository.findAllByEmailContainingIgnoreCase(email).isEmpty()) {
+        if (!repository.findAllByEmail(email).isEmpty()) {
             log.info("Пользователя с email = {} уже существует", email);
             throw new ValidationException("Пользователь с email = " + email + " уже существует.");
         }
@@ -83,10 +103,10 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public void validatorUserId(long userId) {
-        if (repository.findAllByIdContainingIgnoreCase(userId).isEmpty()) {
+    /*public void validatorUserId(long userId) {
+        if (repository.findAllById(userId).isEmpty()) {
             log.info("Пользователя с id = {} нет", userId);
             throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
         }
-    }
+    }*/
 }

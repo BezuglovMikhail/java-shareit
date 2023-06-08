@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -11,12 +10,16 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/items")
 @Slf4j
 public class ItemController {
-    //@Autowired
+
+    @Autowired
     private final ItemService itemService;
+
+    public ItemController(ItemService itemService) {
+        this.itemService = itemService;
+    }
 
     @GetMapping
     public List<ItemDto> getAllItemByIdUser(@RequestHeader("X-Sharer-User-Id") Long userId) {
@@ -40,7 +43,7 @@ public class ItemController {
 
     @PostMapping
     public ItemDto saveUser(@Valid @RequestBody ItemDto itemDto,
-                         @RequestHeader("X-Sharer-User-Id") Long userId) {
+                            @RequestHeader("X-Sharer-User-Id") Long userId) {
         ItemDto addItem = itemService.save(itemDto, userId);
         log.info("Добавлена вещь с id = {} пользователя с id = {}", addItem.getId(), userId);
         return addItem;
@@ -48,8 +51,8 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@Valid @RequestBody ItemDto itemDto,
-                       @RequestHeader("X-Sharer-User-Id") long userId,
-                       @PathVariable Long itemId) {
+                          @RequestHeader("X-Sharer-User-Id") long userId,
+                          @PathVariable Long itemId) {
         ItemDto updateItem = itemService.updateItem(itemDto, userId, itemId);
         log.info("Обновлена вещь с id = {} пользователя с id = {}", updateItem.getId(), userId);
         return updateItem;
