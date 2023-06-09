@@ -36,8 +36,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto save(ItemDto itemDto, Long userId) {
-        validatorUserId(userId);
         validatorItem(itemDto);
+        validatorUserId(userId);
         itemDto.setOwner(userId);
         Item item = itemRepository.save(toItem(itemDto));
         return toItemDto(item);
@@ -64,6 +64,12 @@ public class ItemServiceImpl implements ItemService {
             log.info("Поле itemId - отсутствует");
             throw new IncorrectParameterException("itemId или userId");
         }
+    }
+
+    @Override
+    public Item findItemById(Long id) {
+        return itemRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Вещь с ID=" + id + " не найдена!"));
     }
 
     @Override

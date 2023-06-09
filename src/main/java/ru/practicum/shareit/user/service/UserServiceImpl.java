@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.IncorrectParameterException;
@@ -31,9 +32,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto save(UserDto userDto) {
         validatorEmail(userDto.getEmail());
+        try {
+            return toUserDto(repository.save(toUser(userDto)));
+        } catch (DataIntegrityViolationException e) {
+            throw new ValidationException("Пользователь с E-mail=" +
+                    userDto.getEmail() + " уже существует!");
+        }
+
+        /*validatorEmail(userDto.getEmail());
         validatorRepeatEmail(userDto.getEmail());
         User user = repository.save(toUser(userDto));
-        return toUserDto(user);
+        return toUserDto(user);*/
     }
 
     @Override
@@ -86,6 +95,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserRepository getUserRepository() {
         return repository;
+    }
+
+    @Override
+    public User findUserById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с ID=" + id + " не найден!"));
     }
 
 
