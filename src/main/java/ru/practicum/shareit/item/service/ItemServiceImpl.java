@@ -6,16 +6,15 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.IncorrectParameterException;
 import ru.practicum.shareit.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static ru.practicum.shareit.item.dto.ItemMapper.toItem;
 import static ru.practicum.shareit.item.dto.ItemMapper.toItemDto;
 
@@ -29,9 +28,13 @@ public class ItemServiceImpl implements ItemService {
     @Autowired
     private final UserRepository userRepository;
 
-    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository) {
+    @Autowired
+    private final ItemMapper mapper;
+
+    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, ItemMapper mapper) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
+        this.mapper = mapper;
     }
 
     @Override
@@ -47,7 +50,10 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> findAllItemByIdUser(Long userId) {
         validatorUserId(userId);
         List<Item> items = itemRepository.findByOwner(userId);
-        return items.stream().map(x -> toItemDto(x)).collect(Collectors.toList());
+        return items.stream()
+                .map(mapper::toItemExtDto)
+                .sorted(Comparator.comparing(ItemDto::getId))
+                .collect(toList());
     }
 
     @Override
@@ -69,8 +75,22 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Item findItemById(Long id) {
         return itemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Вещь с ID=" + id + " не найдена!"));
+                .orElseThrow(() -> new NotFoundException("Вещь с id = " + id + " не найдена!"));
     }
+
+    @Override
+    public ItemDto getItemById(Long id, Long userId) {
+        ItemDto itemDto;
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Вещь с id = " + id + " не найдена!"));
+        if (userId.equals(item.getOwner())) {
+            itemDto = mapper.toItemExtDto(item);
+        } else {
+            itemDto = mapper.toItemDto(item);
+        }
+        return itemDto;
+    }
+
 
     @Override
     public void deleteItem(Long itemId, Long userId) {

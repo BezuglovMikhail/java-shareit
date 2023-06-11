@@ -14,6 +14,7 @@ import java.util.List;
 @Slf4j
 public class ItemController {
 
+    private static final String OWNER = "X-Sharer-User-Id";
     @Autowired
     private final ItemService itemService;
 
@@ -29,8 +30,8 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto findById(@PathVariable Long itemId) {
-        ItemDto findItem = itemService.findById(itemId);
+    public ItemDto getItemById(@PathVariable Long itemId, @RequestHeader(OWNER) Long ownerId) {
+        ItemDto findItem = itemService.getItemById(itemId, ownerId);
         log.info("Вещь найдена: " + findItem);
         return findItem;
     }
