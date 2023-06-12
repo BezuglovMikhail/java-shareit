@@ -17,7 +17,5 @@ public interface UserService {
 
     UserDto updateUser(UserDto userDto, long userId);
 
-    UserRepository getUserRepository();
-
     User findUserById(Long id);
 }

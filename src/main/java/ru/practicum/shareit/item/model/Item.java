@@ -27,7 +27,7 @@ public class Item {
 
     private Long owner;
 
-    private String request;
+    private Long requestId;
 
     public Item(Long id, String name, String description, Boolean available) {
         this.id = id;

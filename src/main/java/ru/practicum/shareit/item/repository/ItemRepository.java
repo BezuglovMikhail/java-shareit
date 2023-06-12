@@ -13,31 +13,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findByOwner(Long ownerId);
 
-    /*@Query("select it from Item it " +
-            "where it.owner like '%' " +
-            //"group by it.id "+
-            "order by it.id desc")
-    List<Item> findAllByOwner(Long userId);*/
-
     @Query("select it from Item it " +
             "where lower(it.name) like lower(concat('%', :search, '%')) " +
             " or lower(it.description) like lower(concat('%', :search, '%')) " +
             " and it.available = true")
     List<Item> searchItems(@Param("search") String text);
-
-   /* Item save(ItemDto itemDto, Long userId);
-
-    List<Item> findAllItemsByIdUser(Long userId);
-
-    Item findById(Long itemId);
-
-    void deleteItem(Long userId, Long itemId);
-
-    Item updateItem(ItemDto itemDto, Long userId, Long itemId);
-
-    List<Item> searchItems(String text);
-
-    HashMap<Long, Item> getItems();
-
-    void setId(AtomicLong id);*/
 }

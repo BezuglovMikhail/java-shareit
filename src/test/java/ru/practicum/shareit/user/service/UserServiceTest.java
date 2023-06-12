@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.practicum.shareit.IncorrectParameterException;
-import ru.practicum.shareit.NotFoundException;
+import ru.practicum.shareit.exeption.IncorrectParameterException;
+import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.exeption.ValidationException;
+import ru.practicum.shareit.exeption.ValidationException;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;

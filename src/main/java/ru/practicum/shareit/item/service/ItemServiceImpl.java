@@ -2,21 +2,28 @@ package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.IncorrectParameterException;
-import ru.practicum.shareit.NotFoundException;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingService;
+import ru.practicum.shareit.exeption.IncorrectParameterException;
+import ru.practicum.shareit.exeption.NotFoundException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
-import static ru.practicum.shareit.item.dto.ItemMapper.toItem;
-import static ru.practicum.shareit.item.dto.ItemMapper.toItemDto;
+import static ru.practicum.shareit.item.dto.ItemMapper.*;
+import static ru.practicum.shareit.validator.Validator.*;
 
 @Service
 @Slf4j
@@ -26,29 +33,41 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
 
     @Autowired
+    private final CommentRepository commentRepository;
+
+    @Autowired
     private final UserRepository userRepository;
+
+    @Autowired
+    private final BookingService bookingService;
 
     @Autowired
     private final ItemMapper mapper;
 
-    public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository, ItemMapper mapper) {
+    public ItemServiceImpl(ItemRepository itemRepository,
+                           CommentRepository commentRepository,
+                           UserRepository userRepository,
+                           BookingService bookingService,
+                           ItemMapper mapper) {
         this.itemRepository = itemRepository;
+        this.commentRepository = commentRepository;
         this.userRepository = userRepository;
+        this.bookingService = bookingService;
         this.mapper = mapper;
     }
 
     @Override
     public ItemDto save(ItemDto itemDto, Long userId) {
         validatorItem(itemDto);
-        validatorUserId(userId);
+        validatorUserId(userRepository.findById(userId), userId);
         itemDto.setOwner(userId);
         Item item = itemRepository.save(toItem(itemDto));
-        return toItemDto(item);
+        return mapper.toItemDto(item);
     }
 
     @Override
     public List<ItemDto> findAllItemByIdUser(Long userId) {
-        validatorUserId(userId);
+        validatorUserId(userRepository.findById(userId), userId);
         List<Item> items = itemRepository.findByOwner(userId);
         return items.stream()
                 .map(mapper::toItemExtDto)
@@ -63,11 +82,9 @@ public class ItemServiceImpl implements ItemService {
             if (item.isPresent()) {
                 return toItemDto(item.get());
             } else {
-                log.info("Вещь с id = {} не найдена", itemId);
                 throw new NotFoundException("Вещь с id = " + itemId + " не найдена.");
             }
         } else {
-            log.info("Поле itemId - отсутствует");
             throw new IncorrectParameterException("itemId или userId");
         }
     }
@@ -86,7 +103,7 @@ public class ItemServiceImpl implements ItemService {
         if (userId.equals(item.getOwner())) {
             itemDto = mapper.toItemExtDto(item);
         } else {
-            itemDto = mapper.toItemDto(item);
+            itemDto = toItemDto(item);
         }
         return itemDto;
     }
@@ -94,7 +111,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void deleteItem(Long itemId, Long userId) {
-        validatorUserId(userId);
+        validatorUserId(userRepository.findById(userId), userId);
         itemRepository.deleteById(itemId);
     }
 
@@ -102,7 +119,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto updateItem(ItemDto itemDto, Long userId, Long itemId) {
         if (itemId != null & userId != null) {
             ItemDto itemUpdate = findById(itemId);
-            validatorItemId(itemUpdate, userId);
+            validatorItemIdByUserId(itemUpdate, userId);
             if (itemDto.getName() != null) {
                 itemUpdate.setName(itemDto.getName());
             }
@@ -114,7 +131,6 @@ public class ItemServiceImpl implements ItemService {
             }
             return toItemDto(itemRepository.save(toItem(itemUpdate)));
         } else {
-            log.info("Поле itemId или userId - отсутствует");
             throw new IncorrectParameterException("itemId или userId");
         }
     }
@@ -131,46 +147,27 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public UserRepository getUserRepository() {
-        return userRepository;
+    public CommentDto createComment(CommentDto commentDto, Long itemId, Long userId) {
+        validatorUserId(userRepository.findById(userId), userId);
+        validatorComment(commentDto.getText());
+        Comment comment = new Comment();
+        Booking booking = bookingService.getBookingWithUserBookedItem(itemId, userId);
+        if (booking != null) {
+            comment.setCreated(LocalDateTime.now());
+            comment.setItem(booking.getItem());
+            comment.setAuthor(booking.getBooker());
+            comment.setText(commentDto.getText());
+        } else {
+            throw new IncorrectParameterException("userId");
+        }
+        return mapper.toCommentDto(commentRepository.save(comment));
     }
 
     @Override
-    public ItemRepository getItemRepository() {
-        return itemRepository;
-    }
-
-    public void validatorUserId(Long userId) {
-        if (!userRepository.findById(userId).isPresent()) {
-            log.info("Пользователя с id = {} нет", userId);
-            throw new NotFoundException("Пользователя с id = " + userId + " нет.");
-        }
-    }
-
-    public void validatorItemId(ItemDto itemUpdate, Long userId) {
-        if (itemUpdate == null) {
-            log.info("У пользователя с id = {} нет вещей.", userId);
-            throw new NotFoundException("У пользователя с id = " + userId + " нет вещей.");
-        }
-        if (!Objects.equals(itemUpdate.getOwner(), userId)) {
-            log.info("Вещь с id = {} у пользователя с id = {}  не найдена.", itemUpdate.getId(), userId);
-            throw new NotFoundException("Вещь с id = " + itemUpdate.getId() +
-                    " у пользователя с id = " + userId + " не найдена.");
-        }
-    }
-
-    public void validatorItem(ItemDto itemDto) {
-        if (itemDto.getAvailable() == null) {
-            log.info("Поле available - отсутствует");
-            throw new IncorrectParameterException("available");
-        }
-        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            log.info("Поле name - не может отсутствовать или быть пустым");
-            throw new IncorrectParameterException("name");
-        }
-        if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            log.info("Поле description - не может отсутствовать или быть пустым");
-            throw new IncorrectParameterException("description");
-        }
+    public List<CommentDto> getCommentsByItemId(Long itemId) {
+        return commentRepository.findAllByItem_Id(itemId,
+                        Sort.by(Sort.Direction.DESC, "created")).stream()
+                .map(mapper::toCommentDto)
+                .collect(toList());
     }
 }

@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS items (
   description VARCHAR(1000) NOT NULL,
   available BOOLEAN,
   owner BIGINT,
-  request VARCHAR(1000),
+  request_id BIGINT,
   CONSTRAINT pk_item PRIMARY KEY (id)
   --CONSTRAINT UQ_ITEM_NAME UNIQUE (name)
 );

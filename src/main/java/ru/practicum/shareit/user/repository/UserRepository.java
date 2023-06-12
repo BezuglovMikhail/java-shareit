@@ -4,7 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.model.UserEmail;
-import ru.practicum.shareit.user.model.UserId;
 
 import java.util.List;
 
@@ -13,6 +12,4 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     List<UserEmail> findAllByEmail(String emailSearch);
-
-    List<UserId> findAllById(Long idSearch);
 }

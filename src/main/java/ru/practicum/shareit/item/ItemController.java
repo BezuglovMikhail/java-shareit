@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -64,5 +65,13 @@ public class ItemController {
                            @RequestHeader("X-Sharer-User-Id") long userId) {
         itemService.deleteItem(itemId, userId);
         log.info("Удалена вещь с id = {} пользователя с id = {}", itemId, userId);
+    }
+
+    @ResponseBody
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@RequestBody CommentDto commentDto, @RequestHeader(OWNER) Long userId,
+                                    @PathVariable Long itemId) {
+        log.info("Получен запрос на добавление отзыва пользователем с id = {}", userId);
+        return itemService.createComment(commentDto, itemId, userId);
     }
 }
