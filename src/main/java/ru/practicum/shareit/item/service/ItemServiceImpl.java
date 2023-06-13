@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
-import static ru.practicum.shareit.item.dto.ItemMapper.*;
 import static ru.practicum.shareit.validator.Validator.*;
 
 @Service
@@ -31,16 +30,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired
     private final ItemRepository itemRepository;
-
     @Autowired
     private final CommentRepository commentRepository;
-
     @Autowired
     private final UserRepository userRepository;
-
     @Autowired
     private final BookingService bookingService;
-
     @Autowired
     private final ItemMapper mapper;
 
@@ -61,7 +56,7 @@ public class ItemServiceImpl implements ItemService {
         validatorItem(itemDto);
         validatorUserId(userRepository.findById(userId), userId);
         itemDto.setOwner(userId);
-        Item item = itemRepository.save(toItem(itemDto));
+        Item item = itemRepository.save(mapper.toItem(itemDto));
         return mapper.toItemDto(item);
     }
 
@@ -80,7 +75,7 @@ public class ItemServiceImpl implements ItemService {
         if (itemId != null) {
             Optional<Item> item = itemRepository.findById(itemId);
             if (item.isPresent()) {
-                return toItemDto(item.get());
+                return mapper.toItemDto(item.get());
             } else {
                 throw new NotFoundException("Вещь с id = " + itemId + " не найдена.");
             }
@@ -103,7 +98,7 @@ public class ItemServiceImpl implements ItemService {
         if (userId.equals(item.getOwner())) {
             itemDto = mapper.toItemExtDto(item);
         } else {
-            itemDto = toItemDto(item);
+            itemDto = mapper.toItemDto(item);
         }
         return itemDto;
     }
@@ -129,7 +124,7 @@ public class ItemServiceImpl implements ItemService {
             if (itemDto.getAvailable() != null) {
                 itemUpdate.setAvailable(itemDto.getAvailable());
             }
-            return toItemDto(itemRepository.save(toItem(itemUpdate)));
+            return mapper.toItemDto(itemRepository.save(mapper.toItem(itemUpdate)));
         } else {
             throw new IncorrectParameterException("itemId или userId");
         }
@@ -143,7 +138,7 @@ public class ItemServiceImpl implements ItemService {
         }
         text = text.toLowerCase();
         List<Item> items = itemRepository.searchItems(text);
-        return items.stream().map(x -> toItemDto(x)).collect(Collectors.toList());
+        return items.stream().map(x -> mapper.toItemDto(x)).collect(Collectors.toList());
     }
 
     @Override

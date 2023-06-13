@@ -7,20 +7,24 @@ import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
+import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.service.UserServiceImpl;
-
-import static ru.practicum.shareit.user.dto.UserMapper.toUserDto;
 
 @Component
 public class BookingMapper {
     private UserServiceImpl userService;
     private ItemServiceImpl itemService;
     private ItemMapper itemMapper;
+    private UserMapper userMapper;
 
     @Autowired
-    public BookingMapper(UserServiceImpl userService, ItemServiceImpl itemService) {
+    public BookingMapper(UserServiceImpl userService, ItemServiceImpl itemService,
+                         ItemMapper itemMapper,
+                         UserMapper userMapper) {
         this.userService = userService;
         this.itemService = itemService;
+        this.itemMapper = itemMapper;
+        this.userMapper = userMapper;
     }
 
     public BookingDto toBookingDto(Booking booking) {
@@ -30,7 +34,7 @@ public class BookingMapper {
                     booking.getStart(),
                     booking.getEnd(),
                     itemMapper.toItemDto(booking.getItem()),
-                    toUserDto(booking.getBooker()),
+                    userMapper.toUserDto(booking.getBooker()),
                     booking.getStatus()
             );
         } else {

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.exeption.ValidationException;
+import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.validator.Validator;
@@ -14,7 +15,6 @@ import ru.practicum.shareit.validator.Validator;
 import java.util.List;
 import java.util.Optional;
 
-import static ru.practicum.shareit.user.dto.UserMapper.*;
 import static ru.practicum.shareit.validator.Validator.*;
 
 @Service
@@ -24,15 +24,19 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private final UserRepository repository;
 
-    public UserServiceImpl(UserRepository repository, Validator validator) {
+    @Autowired
+    private final UserMapper userMapper;
+
+    public UserServiceImpl(UserRepository repository, Validator validator, UserMapper userMapper) {
         this.repository = repository;
+        this.userMapper = userMapper;
     }
 
     @Override
     public UserDto save(UserDto userDto) {
         validatorEmail(userDto.getEmail());
         try {
-            return toUserDto(repository.save(toUser(userDto)));
+            return userMapper.toUserDto(repository.save(userMapper.toUser(userDto)));
         } catch (DataIntegrityViolationException e) {
             throw new ValidationException("Пользователь с email = " +
                     userDto.getEmail() + " уже существует!");
@@ -42,14 +46,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> findAllUsers() {
         List<User> users = repository.findAll();
-        return mapToUserDto(users);
+        return userMapper.mapToUserDto(users);
     }
 
     @Override
     public UserDto findByIdUser(long userId) {
         Optional<User> user = repository.findById(userId);
         if (user.isPresent()) {
-            return toUserDto(user.get());
+            return userMapper.toUserDto(user.get());
         } else {
             throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
         }
@@ -77,7 +81,7 @@ public class UserServiceImpl implements UserService {
             if (userDto.getEmail() == null) {
                 userDto.setEmail(user.get().getEmail());
             }
-            return toUserDto(repository.save(toUser(userDto)));
+            return userMapper.toUserDto(repository.save(userMapper.toUser(userDto)));
         } else {
             throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
         }

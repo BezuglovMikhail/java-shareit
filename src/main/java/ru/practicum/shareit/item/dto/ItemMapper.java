@@ -13,7 +13,7 @@ public class ItemMapper {
 
     private BookingService bookingService;
 
-    private static ItemService itemService;
+    private ItemService itemService;
 
     @Autowired
     @Lazy
@@ -22,7 +22,7 @@ public class ItemMapper {
         this.itemService = itemService;
     }
 
-    public static ItemDto toItemDto(Item item) {
+    public ItemDto toItemDto(Item item) {
         return new ItemDto(
                 item.getId(),
                 item.getName(),
@@ -36,7 +36,7 @@ public class ItemMapper {
         );
     }
 
-    public static Item toItem(ItemDto itemDto) {
+    public Item toItem(ItemDto itemDto) {
         return new Item(
                 itemDto.getId(),
                 itemDto.getName(),
