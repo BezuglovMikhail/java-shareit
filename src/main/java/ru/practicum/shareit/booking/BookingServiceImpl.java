@@ -178,7 +178,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingShortDto getLastBooking(Long itemId) {
         BookingShortDto bookingShortDto =
-                mapper.toBookingShortDto(repository.findFirstByItem_IdAndEndBeforeAndStatusOrderByEndDesc(itemId,
+                mapper.toBookingShortDto(repository.findFirstByItem_IdAndStartBeforeAndStatusOrderByEndDesc(itemId,
                         LocalDateTime.now(), APPROVED));
         return bookingShortDto;
     }

@@ -27,7 +27,7 @@ public class ItemDto {
     private BookingShortDto nextBooking;
     private List<CommentDto> comments;
 
-    public ItemDto(Long id, String name, String description, Boolean available) {
+    /*public ItemDto(Long id, String name, String description, Boolean available) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -41,7 +41,6 @@ public class ItemDto {
         this.available = available;
         this.owner = owner;
     }
-
     public ItemDto(Long id, String name, String description, Boolean available, Long owner,
                    BookingShortDto lastBooking, BookingShortDto nextBooking) {
         this.id = id;
@@ -63,5 +62,5 @@ public class ItemDto {
         this.lastBooking = lastBooking;
         this.nextBooking = nextBooking;
         this.comments = comments;
-    }
+    }*/
 }
