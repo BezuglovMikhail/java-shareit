@@ -26,41 +26,4 @@ public class ItemDto {
     private BookingShortDto lastBooking;
     private BookingShortDto nextBooking;
     private List<CommentDto> comments;
-
-    /*public ItemDto(Long id, String name, String description, Boolean available) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.available = available;
-    }
-
-    public ItemDto(Long id, String name, String description, Boolean available, Long owner) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.available = available;
-        this.owner = owner;
-    }
-    public ItemDto(Long id, String name, String description, Boolean available, Long owner,
-                   BookingShortDto lastBooking, BookingShortDto nextBooking) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.available = available;
-        this.owner = owner;
-        this.lastBooking = lastBooking;
-        this.nextBooking = nextBooking;
-    }
-
-    public ItemDto(Long id, String name, String description, Boolean available, Long owner,
-                   BookingShortDto lastBooking, BookingShortDto nextBooking, List<CommentDto> comments) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.available = available;
-        this.owner = owner;
-        this.lastBooking = lastBooking;
-        this.nextBooking = nextBooking;
-        this.comments = comments;
-    }*/
 }

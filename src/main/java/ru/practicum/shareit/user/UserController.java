@@ -23,34 +23,35 @@ public class UserController {
     @GetMapping
     public List<UserDto> getAllUsers() {
         List<UserDto> usersDto = userService.findAllUsers();
-        log.info("Кол-во пользователей: " + usersDto.size());
+        log.info("Request Get received  to find user`s list in database," +
+                " size users in database {}" + usersDto.size());
         return usersDto;
     }
 
     @PostMapping
     public UserDto saveUser(@RequestBody UserDto userDto) {
         UserDto addedUser = userService.save(userDto);
-        log.info("Пользователь добавлен: " + addedUser);
+        log.info("Request Post received to add user: " + addedUser);
         return addedUser;
     }
 
     @PatchMapping("/{userId}")
     public UserDto update(@RequestBody UserDto userDto, @PathVariable Long userId) {
         UserDto updatedUser = userService.updateUser(userDto, userId);
-        log.info("Пользователь обновлен: " + updatedUser);
+        log.info("Request Update received to update user, updateUser: " + updatedUser);
         return updatedUser;
     }
 
     @GetMapping("/{userId}")
     public UserDto findById(@PathVariable long userId) {
         UserDto user = userService.findByIdUser(userId);
-        log.info("Пользователь получен: " + user);
+        log.info("Request Get received to find user: " + user);
         return user;
     }
 
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable long userId) {
         userService.deleteUser(userId);
-        log.info("Пользователь id={} удален", userId);
+        log.info("Request Delete received to user delete, userDeleteId = {} ", userId);
     }
 }

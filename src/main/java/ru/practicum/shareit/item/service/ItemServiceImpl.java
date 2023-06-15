@@ -15,7 +15,7 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -33,7 +33,7 @@ public class ItemServiceImpl implements ItemService {
     @Autowired
     private final CommentRepository commentRepository;
     @Autowired
-    private final UserRepository userRepository;
+    private final UserService userService;
     @Autowired
     private final BookingService bookingService;
     @Autowired
@@ -41,12 +41,12 @@ public class ItemServiceImpl implements ItemService {
 
     public ItemServiceImpl(ItemRepository itemRepository,
                            CommentRepository commentRepository,
-                           UserRepository userRepository,
+                           UserService userService,
                            BookingService bookingService,
                            ItemMapper mapper) {
         this.itemRepository = itemRepository;
         this.commentRepository = commentRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.bookingService = bookingService;
         this.mapper = mapper;
     }
@@ -54,7 +54,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto save(ItemDto itemDto, Long userId) {
         validatorItem(itemDto);
-        validatorUserId(userRepository.findById(userId), userId);
+        validatorUserId(userService.findUserById(userId), userId);
         itemDto.setOwner(userId);
         Item item = itemRepository.save(mapper.toItem(itemDto));
         return mapper.toItemDto(item);
@@ -62,10 +62,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> findAllItemByIdUser(Long userId) {
-        validatorUserId(userRepository.findById(userId), userId);
+        validatorUserId(userService.findUserById(userId), userId);
         List<Item> items = itemRepository.findByOwner(userId);
-        return items.stream()
-                .map(mapper::toItemExtDto)
+        List<ItemDto> itemsDto = new ArrayList<>();
+        for (Item item : items) {
+            itemsDto.add(getItemById(item.getId(), userId));
+        }
+        return itemsDto.stream()
                 .sorted(Comparator.comparing(ItemDto::getId))
                 .collect(toList());
     }
@@ -77,26 +80,28 @@ public class ItemServiceImpl implements ItemService {
             if (item.isPresent()) {
                 return mapper.toItemDto(item.get());
             } else {
-                throw new NotFoundException("Вещь с id = " + itemId + " не найдена.");
+                throw new NotFoundException("Item whit с id = " + itemId + " not found in database.");
             }
         } else {
-            throw new IncorrectParameterException("itemId или userId");
+            throw new IncorrectParameterException("itemId or userId");
         }
     }
 
     @Override
-    public Item findItemById(Long id) {
-        return itemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Вещь с id = " + id + " не найдена!"));
+    public Optional<Item> findItemById(Long id) {
+        return itemRepository.findById(id);
     }
 
     @Override
     public ItemDto getItemById(Long id, Long userId) {
         ItemDto itemDto;
         Item item = itemRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Вещь с id = " + id + " не найдена!"));
+                .orElseThrow(() -> new NotFoundException("Item whit с id = " + id + " not found in database."));
         if (userId.equals(item.getOwner())) {
-            itemDto = mapper.toItemExtDto(item);
+            itemDto = mapper.toItemExtDto(item,
+                    bookingService.getLastBooking(item.getId()),
+                    bookingService.getNextBooking(item.getId()),
+                    getCommentsByItemId(item.getId()));
         } else {
             itemDto = mapper.toItemDto(item);
         }
@@ -106,7 +111,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void deleteItem(Long itemId, Long userId) {
-        validatorUserId(userRepository.findById(userId), userId);
+        validatorUserId(userService.findUserById(userId), userId);
         itemRepository.deleteById(itemId);
     }
 
@@ -126,7 +131,7 @@ public class ItemServiceImpl implements ItemService {
             }
             return mapper.toItemDto(itemRepository.save(mapper.toItem(itemUpdate)));
         } else {
-            throw new IncorrectParameterException("itemId или userId");
+            throw new IncorrectParameterException("itemId or userId");
         }
     }
 
@@ -143,7 +148,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto createComment(CommentDto commentDto, Long itemId, Long userId) {
-        validatorUserId(userRepository.findById(userId), userId);
+        validatorUserId(userService.findUserById(userId), userId);
         validatorComment(commentDto.getText());
         Comment comment = new Comment();
         Booking booking = bookingService.getBookingWithUserBookedItem(itemId, userId);

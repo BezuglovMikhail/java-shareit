@@ -38,8 +38,8 @@ public class UserServiceImpl implements UserService {
         try {
             return userMapper.toUserDto(repository.save(userMapper.toUser(userDto)));
         } catch (DataIntegrityViolationException e) {
-            throw new ValidationException("Пользователь с email = " +
-                    userDto.getEmail() + " уже существует!");
+            throw new ValidationException("That user`s email = " +
+                    userDto.getEmail() + " exists in database!");
         }
     }
 
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
         if (user.isPresent()) {
             return userMapper.toUserDto(user.get());
         } else {
-            throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
+            throw new NotFoundException("User whit id = " + userId + " not found in database.");
         }
     }
 
@@ -83,13 +83,12 @@ public class UserServiceImpl implements UserService {
             }
             return userMapper.toUserDto(repository.save(userMapper.toUser(userDto)));
         } else {
-            throw new NotFoundException("Пользователя с id = " + userId + " не существует.");
+            throw new NotFoundException("User whit id = " + userId + " not found in database.");
         }
     }
 
     @Override
-    public User findUserById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Пользователь с ID=" + id + " не найден!"));
+    public Optional<User> findUserById(Long id) {
+        return repository.findById(id);
     }
 }

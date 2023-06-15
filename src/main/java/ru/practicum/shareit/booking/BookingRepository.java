@@ -22,7 +22,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByItem_Owner(Long ownerId, Sort sort);
 
     List<Booking> findByItem_OwnerAndStartIsBeforeAndEndIsAfter(Long ownerId, LocalDateTime start,
-                                                                   LocalDateTime end, Sort sort);
+                                                                LocalDateTime end, Sort sort);
 
     List<Booking> findByItem_OwnerAndEndIsBefore(Long bookerId, LocalDateTime end, Sort sort);
 

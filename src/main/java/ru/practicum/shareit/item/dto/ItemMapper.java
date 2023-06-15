@@ -3,22 +3,21 @@ package ru.practicum.shareit.item.dto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.booking.BookingService;
+import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
+import java.util.List;
+
 @Component
 public class ItemMapper {
-
-    private BookingService bookingService;
 
     private ItemService itemService;
 
     @Autowired
     @Lazy
-    public ItemMapper(BookingService bookingService, ItemService itemService) {
-        this.bookingService = bookingService;
+    public ItemMapper(ItemService itemService) {
         this.itemService = itemService;
     }
 
@@ -47,7 +46,7 @@ public class ItemMapper {
         );
     }
 
-    public ItemDto toItemExtDto(Item item) {
+    public ItemDto toItemExtDto(Item item, BookingShortDto lastBooking, BookingShortDto nextBooking, List<CommentDto> comments) {
         return new ItemDto(
                 item.getId(),
                 item.getName(),
@@ -55,9 +54,9 @@ public class ItemMapper {
                 item.getAvailable(),
                 item.getOwner(),
                 item.getRequestId() != null ? item.getRequestId() : null,
-                bookingService.getLastBooking(item.getId()),
-                bookingService.getNextBooking(item.getId()),
-                itemService.getCommentsByItemId(item.getId())
+                lastBooking,
+                nextBooking,
+                comments
         );
     }
 

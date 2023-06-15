@@ -5,6 +5,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ItemService {
     ItemDto save(ItemDto itemDto, Long userId);
@@ -13,7 +14,7 @@ public interface ItemService {
 
     ItemDto findById(Long itemId);
 
-    Item findItemById(Long id);
+    Optional<Item> findItemById(Long id);
 
     ItemDto getItemById(Long id, Long userId);
 

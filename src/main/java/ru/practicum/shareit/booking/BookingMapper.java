@@ -6,23 +6,17 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.service.ItemServiceImpl;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.service.UserServiceImpl;
+import ru.practicum.shareit.user.model.User;
 
 @Component
 public class BookingMapper {
-    private UserServiceImpl userService;
-    private ItemServiceImpl itemService;
     private ItemMapper itemMapper;
     private UserMapper userMapper;
 
     @Autowired
-    public BookingMapper(UserServiceImpl userService, ItemServiceImpl itemService,
-                         ItemMapper itemMapper,
-                         UserMapper userMapper) {
-        this.userService = userService;
-        this.itemService = itemService;
+    public BookingMapper(ItemMapper itemMapper, UserMapper userMapper) {
         this.itemMapper = itemMapper;
         this.userMapper = userMapper;
     }
@@ -42,7 +36,7 @@ public class BookingMapper {
         }
     }
 
-    public BookingShortDto toBookingShortDto(Booking booking) {
+    public static BookingShortDto toBookingShortDto(Booking booking) {
         if (booking != null) {
             return new BookingShortDto(
                     booking.getId(),
@@ -55,13 +49,13 @@ public class BookingMapper {
         }
     }
 
-    public Booking toBooking(BookingInputDto bookingInputDto, Long bookerId) {
+    public Booking toBooking(BookingInputDto bookingInputDto, Item item, User user) {
         return new Booking(
                 null,
                 bookingInputDto.getStart(),
                 bookingInputDto.getEnd(),
-                itemService.findItemById(bookingInputDto.getItemId()),
-                userService.findUserById(bookerId),
+                item,
+                user,
                 BookingStatus.WAITING
         );
     }

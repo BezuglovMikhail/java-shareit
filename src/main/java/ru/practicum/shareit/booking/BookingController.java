@@ -26,7 +26,7 @@ public class BookingController {
     @PostMapping
     public BookingDto create(@RequestBody BookingInputDto bookingInputDto,
                              @RequestHeader(USER_ID) Long bookerId) {
-        log.info("Получен запрос на бронирование от пользователя с id = {}", bookerId);
+        log.info("Request Post received to add booking from user whit id = {}", bookerId);
         return service.create(bookingInputDto, bookerId);
     }
 
@@ -34,29 +34,29 @@ public class BookingController {
     @PatchMapping("/{bookingId}")
     public BookingDto update(@PathVariable Long bookingId,
                              @RequestHeader(USER_ID) Long userId, @RequestParam Boolean approved) {
-        log.info("Получен запрос на обновление статуса бронирования с id = {}", bookingId);
+        log.info("Request Patch received to update booking whit с id = {}", bookingId);
         return service.update(bookingId, userId, approved);
     }
 
     @GetMapping("/{bookingId}")
     public BookingDto getBookingById(@PathVariable Long bookingId, @RequestHeader(USER_ID) Long userId) {
-        log.info("Получен запрос на получение на получение информации о бронировании с id = {}", bookingId);
+        log.info("Request Get received to find booking by id = {}", bookingId);
         return service.getBookingById(bookingId, userId);
     }
 
     @GetMapping
     public List<BookingDto> getBookings(@RequestParam(name = "state", defaultValue = "ALL") String state,
                                         @RequestHeader(USER_ID) Long userId) {
-        log.info("Получен запрос на получение списка всех бронирований" +
-                " пользователя с id = {} с параметром STATE = {}", userId, state);
+        log.info("Request Get received whit parameter STATE = {}" +
+                " to find list booking user`s whit id = {} ", state, userId);
         return service.getBookings(state, userId);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getBookingsOwner(@RequestParam(name = "state", defaultValue = "ALL") String state,
                                              @RequestHeader(USER_ID) Long userId) {
-        log.info("Получен запрос на получение списка всех бронирований вещей" +
-                " владельца с id = {} с параметром STATE = {}", userId, state);
+        log.info("Request Get received whit parameter STATE = {}" +
+                " to find list all bookings items the owner whit id = {}", userId, state);
         return service.getBookingsOwner(state, userId);
     }
 }

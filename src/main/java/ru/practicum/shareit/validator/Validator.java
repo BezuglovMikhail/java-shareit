@@ -21,30 +21,31 @@ public class Validator {
 
     public static void validatorRepeatEmail(List<UserEmail> checkEmail, String email) {
         if (!checkEmail.isEmpty()) {
-            throw new ValidationException("Пользователь с email = " + email + " уже существует.");
+            throw new ValidationException("That user`s email = " +
+                    email + " exists in database!");
         }
     }
 
     public static void validatorEmail(String email) {
         if (email == null || !email.contains("@")) {
-            log.info("Ошибка в поле: email = {}", email);
+            log.info("Error is in box : email = {}", email);
             throw new IncorrectParameterException("email");
         }
     }
 
     public static void validatorUserId(Optional<User> user, Long userId) {
         if (!user.isPresent()) {
-            throw new NotFoundException("Пользователя с id = " + userId + " нет.");
+            throw new NotFoundException("User whit id = " + userId + " not found in database.");
         }
     }
 
     public static void validatorItemIdByUserId(ItemDto itemUpdate, Long userId) {
         if (itemUpdate == null) {
-            throw new NotFoundException("У пользователя с id = " + userId + " нет вещей.");
+            throw new NotFoundException("User whit id = " + userId + " don`t have items.");
         }
         if (!Objects.equals(itemUpdate.getOwner(), userId)) {
-            throw new NotFoundException("Вещь с id = " + itemUpdate.getId() +
-                    " у пользователя с id = " + userId + " не найдена.");
+            throw new NotFoundException("User whit id = " + itemUpdate.getId() +
+                    " don`t have item whit id = " + userId);
         }
     }
 
@@ -62,14 +63,14 @@ public class Validator {
 
     public static void validatorItemId(Optional<Item> item, Long itemId) {
         if (!item.isPresent()) {
-            throw new NotFoundException("Вещь с id = " + itemId + " не существует.");
+            throw new NotFoundException("Item whit id = " + itemId + " not found in database.");
         }
     }
 
 
     public static void validatorItemAvailable(boolean available) {
         if (!available) {
-            throw new IncorrectParameterException("available (вещь забронирована)");
+            throw new IncorrectParameterException("available (that item already booking)");
         }
     }
 
@@ -79,16 +80,16 @@ public class Validator {
                 start.isAfter(end) ||
                 start.equals(end) ||
                 start.isBefore(LocalDateTime.now())) {
-            throw new IncorrectParameterException("start или end");
+            throw new IncorrectParameterException("start or end");
         }
     }
 
     public static boolean validatorItemOwner(Long ownerId, Long userId) {
         if (ownerId == null) {
-            throw new NotFoundException("У пользователя с id = " + userId + " нет вещей.");
+            throw new NotFoundException("User whit id = " + userId + " don`t have items.");
         }
         if (!Objects.equals(ownerId, userId)) {
-            throw new NotFoundException("Только владелец может подтвердить бронирование");
+            throw new NotFoundException("Only the owner of the item can APPROVED the booking!");
         }
         return true;
     }

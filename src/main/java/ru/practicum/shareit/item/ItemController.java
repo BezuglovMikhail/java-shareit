@@ -26,20 +26,21 @@ public class ItemController {
     @GetMapping
     public List<ItemDto> getAllItemByIdUser(@RequestHeader("X-Sharer-User-Id") Long userId) {
         List<ItemDto> allItemsByIdUser = itemService.findAllItemByIdUser(userId);
-        log.info("Количество вещей пользователя с id = {} - {} шт.", userId, allItemsByIdUser.size());
+        log.info("Request Get received to list items user`s whit id = {}, size find items = {}.",
+                userId, allItemsByIdUser.size());
         return itemService.findAllItemByIdUser(userId);
     }
 
     @GetMapping("/{itemId}")
     public ItemDto getItemById(@PathVariable Long itemId, @RequestHeader(OWNER) Long ownerId) {
         ItemDto findItem = itemService.getItemById(itemId, ownerId);
-        log.info("Вещь найдена: " + findItem);
+        log.info("Request Get received to item " + findItem);
         return findItem;
     }
 
     @GetMapping("/search")
     public List<ItemDto> searchFilms(@RequestParam String text) {
-        log.info("Обрабатываем поисковой запрос. Text = " + text);
+        log.info("Request Get received to search text = " + text);
         return itemService.searchItems(text);
     }
 
@@ -47,7 +48,7 @@ public class ItemController {
     public ItemDto saveUser(@Valid @RequestBody ItemDto itemDto,
                             @RequestHeader("X-Sharer-User-Id") Long userId) {
         ItemDto addItem = itemService.save(itemDto, userId);
-        log.info("Добавлена вещь с id = {} пользователя с id = {}", addItem.getId(), userId);
+        log.info("Request Post received to add item user`s whit id = {}", userId);
         return addItem;
     }
 
@@ -56,7 +57,7 @@ public class ItemController {
                           @RequestHeader("X-Sharer-User-Id") long userId,
                           @PathVariable Long itemId) {
         ItemDto updateItem = itemService.updateItem(itemDto, userId, itemId);
-        log.info("Обновлена вещь с id = {} пользователя с id = {}", updateItem.getId(), userId);
+        log.info("Request Update received to update item whit id = {} user whit id = {}", updateItem.getId(), userId);
         return updateItem;
     }
 
@@ -64,14 +65,14 @@ public class ItemController {
     public void deleteUser(@PathVariable long itemId,
                            @RequestHeader("X-Sharer-User-Id") long userId) {
         itemService.deleteItem(itemId, userId);
-        log.info("Удалена вещь с id = {} пользователя с id = {}", itemId, userId);
+        log.info("Request Delete received to delete item whit id = {} user whit id = {}", itemId, userId);
     }
 
     @ResponseBody
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestBody CommentDto commentDto, @RequestHeader(OWNER) Long userId,
                                     @PathVariable Long itemId) {
-        log.info("Получен запрос на добавление отзыва пользователем с id = {}", userId);
+        log.info("Request Post received to add comment by user whit id = {}", userId);
         return itemService.createComment(commentDto, itemId, userId);
     }
 }
