@@ -5,10 +5,10 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.model.User;
 
 @Component
 public class BookingMapper {
@@ -49,13 +49,13 @@ public class BookingMapper {
         }
     }
 
-    public Booking toBooking(BookingInputDto bookingInputDto, Item item, User user) {
+    public Booking toBooking(BookingInputDto bookingInputDto, ItemDto item, UserDto user) {
         return new Booking(
                 null,
                 bookingInputDto.getStart(),
                 bookingInputDto.getEnd(),
-                item,
-                user,
+                itemMapper.toItem(item),
+                userMapper.toUser(user),
                 BookingStatus.WAITING
         );
     }

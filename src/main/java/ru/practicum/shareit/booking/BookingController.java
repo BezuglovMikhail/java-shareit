@@ -27,7 +27,7 @@ public class BookingController {
     public BookingDto create(@RequestBody BookingInputDto bookingInputDto,
                              @RequestHeader(USER_ID) Long bookerId) {
         log.info("Request Post received to add booking from user whit id = {}", bookerId);
-        return service.create(bookingInputDto, bookerId);
+        return service.save(bookingInputDto, bookerId);
     }
 
     @ResponseBody

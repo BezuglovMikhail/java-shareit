@@ -7,7 +7,7 @@ import ru.practicum.shareit.booking.dto.BookingShortDto;
 import java.util.List;
 
 public interface BookingService {
-    BookingDto create(BookingInputDto bookingDto, Long bookerId);
+    BookingDto save(BookingInputDto bookingDto, Long bookerId);
 
     BookingDto update(Long bookingId, Long userId, Boolean approved);
 

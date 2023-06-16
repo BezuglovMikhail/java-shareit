@@ -6,14 +6,11 @@ import ru.practicum.shareit.exeption.IncorrectParameterException;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.exeption.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.model.UserEmail;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -30,12 +27,6 @@ public class Validator {
         if (email == null || !email.contains("@")) {
             log.info("Error is in box : email = {}", email);
             throw new IncorrectParameterException("email");
-        }
-    }
-
-    public static void validatorUserId(Optional<User> user, Long userId) {
-        if (!user.isPresent()) {
-            throw new NotFoundException("User whit id = " + userId + " not found in database.");
         }
     }
 
@@ -60,13 +51,6 @@ public class Validator {
             throw new IncorrectParameterException("description");
         }
     }
-
-    public static void validatorItemId(Optional<Item> item, Long itemId) {
-        if (!item.isPresent()) {
-            throw new NotFoundException("Item whit id = " + itemId + " not found in database.");
-        }
-    }
-
 
     public static void validatorItemAvailable(boolean available) {
         if (!available) {

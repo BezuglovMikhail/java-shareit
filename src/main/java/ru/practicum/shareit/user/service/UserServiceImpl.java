@@ -51,12 +51,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto findByIdUser(long userId) {
-        Optional<User> user = repository.findById(userId);
-        if (user.isPresent()) {
-            return userMapper.toUserDto(user.get());
-        } else {
-            throw new NotFoundException("User whit id = " + userId + " not found in database.");
-        }
+        return userMapper.toUserDto(repository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User whit id = " + userId + " not found in database.")));
     }
 
     @Override
@@ -85,10 +81,5 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new NotFoundException("User whit id = " + userId + " not found in database.");
         }
-    }
-
-    @Override
-    public Optional<User> findUserById(Long id) {
-        return repository.findById(id);
     }
 }

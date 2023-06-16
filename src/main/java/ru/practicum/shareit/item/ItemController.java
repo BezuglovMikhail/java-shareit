@@ -73,6 +73,6 @@ public class ItemController {
     public CommentDto createComment(@RequestBody CommentDto commentDto, @RequestHeader(OWNER) Long userId,
                                     @PathVariable Long itemId) {
         log.info("Request Post received to add comment by user whit id = {}", userId);
-        return itemService.createComment(commentDto, itemId, userId);
+        return itemService.saveComment(commentDto, itemId, userId);
     }
 }
