@@ -1,10 +1,12 @@
-package ru.practicum.shareit;
+package ru.practicum.shareit.handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.user.exeption.ValidationException;
+import ru.practicum.shareit.exeption.IncorrectParameterException;
+import ru.practicum.shareit.exeption.NotFoundException;
+import ru.practicum.shareit.exeption.ValidationException;
 
 @RestControllerAdvice
 public class ErrorHandler {
@@ -12,7 +14,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleIncorrectParameterException(final IncorrectParameterException e) {
         return new ErrorResponse(
-                String.format("Ошибка с полем \"%s\".", e.getParameter())
+                String.format("Unknown state: %s", e.getParameter())
         );
     }
 
@@ -34,7 +36,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
         return new ErrorResponse(
-                "Произошла непредвиденная ошибка."
+                "Unexpected error occurred."
         );
     }
 }
