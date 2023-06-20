@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,5 +26,7 @@ public class Comment {
     @ManyToOne()
     @JoinColumn(name = "author_id", referencedColumnName = "id")
     private User author;
-    private LocalDateTime created;
+    @JsonFormat
+            (shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+    private LocalDateTime createdTime;
 }

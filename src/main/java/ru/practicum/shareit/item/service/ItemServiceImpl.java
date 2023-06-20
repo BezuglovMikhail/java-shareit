@@ -177,7 +177,7 @@ public class ItemServiceImpl implements ItemService {
         Comment comment = new Comment();
 
         if (booking != null) {
-            comment.setCreated(LocalDateTime.now());
+            comment.setCreatedTime(LocalDateTime.now());
             comment.setItem(booking.getItem());
             comment.setAuthor(booking.getBooker());
             comment.setText(textComment);

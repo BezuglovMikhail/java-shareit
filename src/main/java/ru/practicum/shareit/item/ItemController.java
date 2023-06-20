@@ -28,7 +28,7 @@ public class ItemController {
         List<ItemDto> allItemsByIdUser = itemService.findAllItemByIdUser(userId);
         log.info("Request Get received to list items user`s whit id = {}, size find items = {}.",
                 userId, allItemsByIdUser.size());
-        return itemService.findAllItemByIdUser(userId);
+        return allItemsByIdUser;
     }
 
     @GetMapping("/{itemId}")
@@ -62,7 +62,7 @@ public class ItemController {
     }
 
     @DeleteMapping("/{itemId}")
-    public void deleteUser(@PathVariable long itemId,
+    public void deleteItem(@PathVariable long itemId,
                            @RequestHeader("X-Sharer-User-Id") long userId) {
         itemService.deleteItem(itemId, userId);
         log.info("Request Delete received to delete item whit id = {} user whit id = {}", itemId, userId);
