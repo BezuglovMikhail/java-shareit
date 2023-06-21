@@ -24,7 +24,6 @@ public class CommentDto {
     @JsonIgnore
     private Item item;
     private String authorName;
-    @JsonFormat
-            (shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+
     private LocalDateTime createdTime;
 }

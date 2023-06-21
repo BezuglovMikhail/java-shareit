@@ -3,24 +3,15 @@ package ru.practicum.shareit.item;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.UserController;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.service.UserService;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -34,19 +25,16 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(controllers = ItemController.class)
 class ItemControllerTest {
 
-    @Mock
-    private ItemService itemService;
+    @Autowired
+    ObjectMapper mapper;
 
-    @InjectMocks
-    private ItemController controller;
+    @MockBean
+    ItemService itemService;
 
-    private final ObjectMapper mapper = new ObjectMapper();
-
-    private ItemMapper itemMapper;
-
+    @Autowired
     private MockMvc mvc;
 
     private ItemDto itemDto;
@@ -57,12 +45,8 @@ class ItemControllerTest {
 
     private static final String USER_ID = "X-Sharer-User-Id";
 
-
     @BeforeEach
     void setUp() {
-        mvc = MockMvcBuilders
-                .standaloneSetup(controller)
-                .build();
 
         itemDto = new ItemDto(1L,
                 "Дрель-тест",
@@ -289,24 +273,15 @@ class ItemControllerTest {
     }
 
     @Test
-    void createComment() throws Exception{
+    void createComment() throws Exception {
         Long ownerIdTest = 1L;
         Long itemId = 1L;
-
-        Item itemTest = new Item(
-                1L,
-                "Отвертка",
-                "Крестовая",
-                true,
-                ownerIdTest,
-                1L
-        );
 
         CommentDto commentDto = new CommentDto(
                 1L,
                 "Качественная вещь",
-                itemTest,
-                "Гриша",
+                null,
+                "authorName",
                 LocalDateTime.of(2023, 6, 19, 22, 23, 3)
         );
 
@@ -324,7 +299,8 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.id", is(commentDto.getId()), Long.class))
                 .andExpect(jsonPath("$.text", is(commentDto.getText())))
                 .andExpect(jsonPath("$.authorName", is(commentDto.getAuthorName())))
-                .andExpect(jsonPath("$.createdTime", is(commentDto.getCreatedTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))))
+                .andExpect(jsonPath("$.createdTime",
+                        is(commentDto.getCreatedTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))))
         ;
 
         Mockito.verify(itemService, Mockito.times(1))
