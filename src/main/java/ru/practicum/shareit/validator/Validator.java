@@ -83,4 +83,16 @@ public class Validator {
             throw new IncorrectParameterException("text");
         }
     }
+
+    public static void validatorRequestDescription(String text) {
+        if (text == null || text.isBlank()) {
+            throw new IncorrectParameterException("text");
+        }
+    }
+
+    public static void validatorRequestSize(Integer size) {
+        if (size <= 0 ) {
+            throw new IncorrectParameterException("size");
+        }
+    }
 }

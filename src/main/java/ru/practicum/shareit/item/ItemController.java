@@ -24,7 +24,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getAllItemByIdUser(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDto> getAllItemByIdUser(@RequestHeader(OWNER) Long userId) {
         List<ItemDto> allItemsByIdUser = itemService.findAllItemByIdUser(userId);
         log.info("Request Get received to list items user`s whit id = {}, size find items = {}.",
                 userId, allItemsByIdUser.size());
@@ -46,7 +46,7 @@ public class ItemController {
 
     @PostMapping
     public ItemDto saveItem(@Valid @RequestBody ItemDto itemDto,
-                            @RequestHeader("X-Sharer-User-Id") Long userId) {
+                            @RequestHeader(OWNER) Long userId) {
         ItemDto addItem = itemService.save(itemDto, userId);
         log.info("Request Post received to add item user`s whit id = {}", userId);
         return addItem;
@@ -54,7 +54,7 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@Valid @RequestBody ItemDto itemDto,
-                          @RequestHeader("X-Sharer-User-Id") long userId,
+                          @RequestHeader(OWNER) long userId,
                           @PathVariable Long itemId) {
         ItemDto updateItem = itemService.updateItem(itemDto, userId, itemId);
         log.info("Request Update received to update item whit id = {} user whit id = {}", updateItem.getId(), userId);
@@ -63,7 +63,7 @@ public class ItemController {
 
     @DeleteMapping("/{itemId}")
     public void deleteItem(@PathVariable long itemId,
-                           @RequestHeader("X-Sharer-User-Id") long userId) {
+                           @RequestHeader(OWNER) long userId) {
         itemService.deleteItem(itemId, userId);
         log.info("Request Delete received to delete item whit id = {} user whit id = {}", itemId, userId);
     }

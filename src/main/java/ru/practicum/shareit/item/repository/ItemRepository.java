@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.repository;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,4 +19,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             " or lower(it.description) like lower(concat('%', :search, '%')) " +
             " and it.available = true")
     List<Item> searchItems(@Param("search") String text);
+
+    List<Item> findAllByRequestId(Long requestId, Sort sort);
 }

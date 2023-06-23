@@ -23,4 +23,6 @@ public interface ItemService {
     CommentDto saveComment(CommentDto commentDto, Long itemId, Long userId);
 
     List<CommentDto> getCommentsByItemId(Long itemId);
+
+    List<ItemDto> getItemsByRequestId(Long requestId);
 }

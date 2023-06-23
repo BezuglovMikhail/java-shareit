@@ -299,8 +299,8 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.id", is(commentDto.getId()), Long.class))
                 .andExpect(jsonPath("$.text", is(commentDto.getText())))
                 .andExpect(jsonPath("$.authorName", is(commentDto.getAuthorName())))
-                .andExpect(jsonPath("$.createdTime",
-                        is(commentDto.getCreatedTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))))
+                .andExpect(jsonPath("$.created",
+                        is(commentDto.getCreated().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))))
         ;
 
         Mockito.verify(itemService, Mockito.times(1))

@@ -66,6 +66,6 @@ public class ItemMapper {
                 comment.getText(),
                 comment.getItem(),
                 comment.getAuthor().getName(),
-                comment.getCreatedTime());
+                comment.getCreated());
     }
 }

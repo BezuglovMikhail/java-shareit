@@ -177,7 +177,7 @@ public class ItemServiceImpl implements ItemService {
         Comment comment = new Comment();
 
         if (booking != null) {
-            comment.setCreatedTime(LocalDateTime.now());
+            comment.setCreated(LocalDateTime.now());
             comment.setItem(booking.getItem());
             comment.setAuthor(booking.getBooker());
             comment.setText(textComment);
@@ -186,5 +186,13 @@ public class ItemServiceImpl implements ItemService {
         }
 
         return comment;
+    }
+
+    @Override
+    public List<ItemDto> getItemsByRequestId(Long requestId) {
+        return itemRepository.findAllByRequestId(requestId,
+                        Sort.by(Sort.Direction.DESC, "id")).stream()
+                .map(mapper::toItemDto)
+                .collect(toList());
     }
 }

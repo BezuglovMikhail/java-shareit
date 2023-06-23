@@ -1,6 +1,5 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,19 +12,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "comments")
-public class Comment {
+@Table(name = "request ")
+public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String text;
+    private String description;
     @ManyToOne()
-    @JoinColumn(name = "item_id", referencedColumnName = "id")
-    private Item item;
-    @ManyToOne()
-    @JoinColumn(name = "author_id", referencedColumnName = "id")
-    private User author;
-
+    @JoinColumn(name = "creator_id", referencedColumnName = "id")
+    private User creatorRequest;
     private LocalDateTime created;
 }
