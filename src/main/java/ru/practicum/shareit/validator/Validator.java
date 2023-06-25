@@ -91,7 +91,7 @@ public class Validator {
     }
 
     public static void validatorRequestSize(Integer size) {
-        if (size <= 0 ) {
+        if (size <= 0) {
             throw new IncorrectParameterException("size");
         }
     }

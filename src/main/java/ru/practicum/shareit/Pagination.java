@@ -9,8 +9,6 @@ public class Pagination {
     private Integer index;
     private Integer totalPages;
 
-
-
     public Pagination(Integer from, Integer size) {
         if (size != null) {
             if ((from < 0) || (size < 0)) {

@@ -10,7 +10,6 @@ import ru.practicum.shareit.exeption.ValidationException;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.validator.Validator;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +26,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository repository, Validator validator, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository repository, UserMapper userMapper) {
         this.repository = repository;
         this.userMapper = userMapper;
     }

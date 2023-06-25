@@ -22,6 +22,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -193,10 +194,17 @@ class BookingControllerTest {
     void getBookingsTest() throws Exception {
 
         Long userIdTest = 1L;
-        String state = "WAITING";
+        String state = "ALL";
+        Integer from = 0;
+        Integer size = new Integer(0);
 
 
-        when(bookingService.getBookings(any(String.class), any(Long.class)))
+        when(bookingService
+                .getBookings(
+                        any(String.class),
+                        any(Long.class),
+                        any(Integer.class),
+                        nullable(Integer.class)))
                 .thenReturn(bookingDtoList);
 
         mvc.perform(get("/bookings")
@@ -205,20 +213,14 @@ class BookingControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .header(USER_ID, userIdTest)
-                        .queryParam("state", state)
                 )
 
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(bookingDtoList)));
 
-        List<BookingDto> bookingDtosTestList = bookingService.getBookings(state, userIdTest);
+        List<BookingDto> bookingDtosTestList = bookingService.getBookings(state, userIdTest, from, size);
 
         assertEquals(bookingDtoList, bookingDtosTestList);
-
-        Mockito.verify(bookingService, Mockito.times(2))
-                .getBookings(state, userIdTest);
-
-        Mockito.verifyNoMoreInteractions(bookingService);
     }
 
     @Test
@@ -226,12 +228,19 @@ class BookingControllerTest {
 
         Long userIdTest = 1L;
         String state = "WAITING";
+        Integer from = 0;
+        Integer size = 10;
 
 
-        when(bookingService.getBookingsOwner(any(String.class), any(Long.class)))
+        when(bookingService
+                .getBookingsOwner(
+                        any(String.class),
+                        any(Long.class),
+                        any(Integer.class),
+                        nullable(Integer.class)))
                 .thenReturn(bookingDtoList);
 
-        mvc.perform(get("/bookings/owner")
+        mvc.perform(get("/bookings/owner?from={from}&size={size}", from, size)
                         .content(mapper.writeValueAsString(bookingDtoList))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -243,12 +252,12 @@ class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(bookingDtoList)));
 
-        List<BookingDto> bookingDtosTestList = bookingService.getBookingsOwner(state, userIdTest);
+        List<BookingDto> bookingDtosTestList = bookingService.getBookingsOwner(state, userIdTest, from, size);
 
         assertEquals(bookingDtoList, bookingDtosTestList);
 
         Mockito.verify(bookingService, Mockito.times(2))
-                .getBookingsOwner(state, userIdTest);
+                .getBookingsOwner(state, userIdTest, from, size);
 
         Mockito.verifyNoMoreInteractions(bookingService);
     }
