@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.repository;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,6 @@ class UserRepositoryTest {
     User userSave;
 
     User userSave2;
-    User userUpdate;
 
     List<User> users;
 
@@ -39,13 +39,8 @@ class UserRepositoryTest {
                 "test2@mail.com"
         );
 
-
-
-        userUpdate = new User(
-                1L,
-                "nameUpdate",
-                "testUpdate@mail.com"
-        );
+        userRepository.save(userSave);
+        userRepository.save(userSave2);
 
         users = List.of(new User(
                         1L,
@@ -60,8 +55,6 @@ class UserRepositoryTest {
 
     @Test
     void saveAndFind() {
-        userRepository.save(userSave);
-        userRepository.save(userSave2);
        List<User> userList = userRepository.findAll();
 
        assertEquals(users, userList);
@@ -69,20 +62,18 @@ class UserRepositoryTest {
 
     @Test
     void findUserByIdTest() {
-        userRepository.save(userSave);
-        userRepository.save(userSave2);
-        assertEquals(Optional.of(userSave2), userRepository.findById(2L));
+       User userSave5 = new User(
+                5L,
+                "nameTest5",
+                "test5@mail.com");
+
+        userRepository.save(userSave5);
+        //userRepository.save(userSave2);
+        assertEquals(Optional.of(userSave5), userRepository.findById(5L));
     }
 
-    /*@Test
-    void findAllByEmailTest() {
-        userRepository.save(userSave);
-        userRepository.save(userSave2);
-
-        UserEmail userEmail = new UserEmail(
-                "test@mail.com"
-        );
-
-        assertEquals(Optional.of("test@mail.com"), (UserEmail) userRepository.findAllByEmail("test@mail.com"));
-    }*/
+    @AfterEach
+    private void clear() {
+        userRepository.deleteAll();
+    }
 }

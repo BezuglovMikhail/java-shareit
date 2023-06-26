@@ -17,7 +17,6 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.validator.Validator;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,27 +30,25 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
-    UserService userService;
+    private UserService userService;
 
-    UserMapper userMapper = new UserMapper();
-
-    Validator validator;
+    private UserMapper userMapper = new UserMapper();
 
     @Mock
-    UserRepository userRepositoryMock;
+    private UserRepository userRepositoryMock;
 
     private UserDto userDto;
     private UserDto userDtoFalse;
 
-    User userSave;
+    private User userSave;
 
-    List<User> users;
+    private List<User> users;
 
     private UserDto userDtoUpdate;
 
     private List<UserDto> usersDto;
 
-    User userUpdate;
+    private User userUpdate;
 
     @BeforeEach
     void setUp() {
@@ -113,7 +110,6 @@ class UserServiceImplTest {
 
     @Test
     void saveUserTest() {
-
         when(userRepositoryMock.save(any())).thenReturn(userSave);
 
         UserDto userDtoSave = userService.save(userDto);

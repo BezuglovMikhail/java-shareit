@@ -23,6 +23,5 @@ public class CommentDto {
     @JsonIgnore
     private Item item;
     private String authorName;
-
     private LocalDateTime created;
 }
