@@ -86,7 +86,7 @@ public class Validator {
 
     public static void validatorRequestDescription(String text) {
         if (text == null || text.isBlank()) {
-            throw new IncorrectParameterException("text");
+            throw new IncorrectParameterException("description");
         }
     }
 

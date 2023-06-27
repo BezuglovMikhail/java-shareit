@@ -6,9 +6,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface RequestService {
-    RequestDto create(RequestDto itemRequestDto, Long creatorRequestId, LocalDateTime created);
+    RequestDto create(RequestDto requestDto, Long creatorRequestId, LocalDateTime created);
 
-    RequestDto getRequestById(Long itemRequestId, Long userId);
+    RequestDto getRequestById(Long requestId, Long userId);
 
     List<RequestDto> getOwnRequests(Long creatorRequestId);
 

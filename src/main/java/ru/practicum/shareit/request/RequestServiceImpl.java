@@ -11,7 +11,6 @@ import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.request.dto.RequestMapper;
 import ru.practicum.shareit.user.service.UserService;
-import ru.practicum.shareit.validator.Validator;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,25 +23,21 @@ import static ru.practicum.shareit.validator.Validator.validatorRequestSize;
 @Service
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository repository;
-    private final Validator validator;
     private final RequestMapper mapper;
-
     private final UserService userService;
 
     @Autowired
-    public RequestServiceImpl(RequestRepository repository,
-                              Validator validator, RequestMapper mapper, UserService userService) {
+    public RequestServiceImpl(RequestRepository repository, RequestMapper mapper, UserService userService) {
         this.repository = repository;
-        this.validator = validator;
         this.mapper = mapper;
         this.userService = userService;
     }
 
     @Override
-    public RequestDto create(RequestDto itemRequestDto, Long creatorRequestId, LocalDateTime created) {
-        validatorRequestDescription(itemRequestDto.getDescription());
+    public RequestDto create(RequestDto requestDto, Long creatorRequestId, LocalDateTime created) {
+        validatorRequestDescription(requestDto.getDescription());
 
-        Request request = mapper.toRequest(itemRequestDto, creatorRequestId, created);
+        Request request = mapper.toRequest(requestDto, creatorRequestId, created);
         return mapper.toRequestDto(repository.save(request));
     }
 
