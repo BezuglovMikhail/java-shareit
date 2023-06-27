@@ -140,7 +140,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItems(String text) {
-        if (text.isBlank() || text == null) {
+        if (text.isBlank()) {
             List<ItemDto> itemsClear = new ArrayList<>();
             return itemsClear;
         }
@@ -167,6 +167,14 @@ public class ItemServiceImpl implements ItemService {
                 .collect(toList());
     }
 
+    @Override
+    public List<ItemDto> getItemsByRequestId(Long requestId) {
+        return itemRepository.findAllByRequestId(requestId,
+                        Sort.by(Sort.Direction.DESC, "id")).stream()
+                .map(mapper::toItemDto)
+                .collect(toList());
+    }
+
     public void validatorCreateComment(Long userId, String textComment) {
         userService.findByIdUser(userId);
         validatorComment(textComment);
@@ -186,13 +194,5 @@ public class ItemServiceImpl implements ItemService {
         }
 
         return comment;
-    }
-
-    @Override
-    public List<ItemDto> getItemsByRequestId(Long requestId) {
-        return itemRepository.findAllByRequestId(requestId,
-                        Sort.by(Sort.Direction.DESC, "id")).stream()
-                .map(mapper::toItemDto)
-                .collect(toList());
     }
 }
