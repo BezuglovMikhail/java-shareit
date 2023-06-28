@@ -68,12 +68,12 @@ public class RequestServiceImpl implements RequestService {
         Sort sort = Sort.by(Sort.Direction.DESC, "created");
 
         if (size == null) {
-
             List<Request> listItemRequest = repository.findAllByIdNotOrderByCreatedDesc(creatorRequestId);
             listRequestDto
                     .addAll(listItemRequest.stream().skip(from).map(mapper::toRequestDto).collect(toList()));
         } else {
             validatorRequestSize(size);
+
             for (int i = pager.getIndex(); i < pager.getTotalPages(); i++) {
                 pageable =
                         PageRequest.of(i, pager.getPageSize(), sort);

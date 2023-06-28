@@ -8,7 +8,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.*;
+import ru.practicum.shareit.Pagination;
 import ru.practicum.shareit.exeption.IncorrectParameterException;
+import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.request.dto.RequestDto;
@@ -51,7 +54,6 @@ class RequestServiceImplTest {
     private ItemDto itemDto;
     private ItemDto itemDto2;
     private LocalDateTime createdRequest;
-    private List<ItemDto> itemDtoEmptyList;
     private List<ItemDto> itemDtoList;
     private List<CommentDto> commentDtoList;
 
@@ -127,103 +129,6 @@ class RequestServiceImplTest {
 
         requestDtoList = List.of(requestDtoSave, requestDtoSave2);
         requestList = List.of(requestSave, requestSave2);
-        /*itemSave = new Item(
-                1L,
-                "Колотушка",
-                "Создаёт шум",
-                true,
-                1L,
-                null);
-
-        itemSave2 = new Item(
-                2L,
-                "Киянка",
-                "Деревянный молоток",
-                true,
-                1L,
-                1L);
-
-        itemUpdate = new Item(
-                1L,
-                "Колотушка",
-                "Почти сломана",
-                false,
-                1L,
-                null);
-
-        itemDtoSave = new ItemDto(
-                1L,
-                "Колотушка",
-                "Создаёт шум",
-                true,
-                1L,
-                null,
-                null,
-                null,
-                commentDtoList);
-
-        itemDtoSave2 = new ItemDto(
-                2L,
-                "Киянка",
-                "Деревянный молоток",
-                true,
-                1L,
-                1L,
-                null,
-                null,
-                commentDtoList);
-
-        itemDtoUpdate = new ItemDto(
-                1L,
-                "Колотушка",
-                "Почти сломана",
-                false,
-                1L,
-                null,
-                null,
-                null,
-                commentDtoList);
-
-
-
-        itemList = List.of(itemSave, itemSave2);
-        itemDtoList = List.of(itemDtoSave, itemDtoSave2);
-
-        booking = new Booking(
-                1L,
-                start,
-                end,
-                itemSave,
-                user,
-                BookingStatus.WAITING
-        );
-
-        comment = new Comment(
-                1L,
-                "Супер колотушка, всем соседям понравилась!",
-                itemSave,
-                user,
-                LocalDateTime.of(2023, 6, 27, 15, 00, 0)
-        );
-
-        commentDto = new CommentDto(1L,
-                "Супер колотушка, всем соседям понравилась!",
-                itemSave,
-                "nameTest",
-                LocalDateTime.of(2023, 6, 27, 15, 00, 0));
-
-        comment2 = new Comment(2L,
-                "Очень тяжелая!!! Не рекомендую!",
-                itemSave,
-                user,
-                LocalDateTime.of(2023, 6, 27, 20, 00, 0)
-        );
-
-        commentDto2 = new CommentDto(2L,
-                "Очень тяжелая!!! Не рекомендую!",
-                itemSave,
-                "nameTest",
-                LocalDateTime.of(2023, 6, 27, 20, 00, 0));*/
     }
 
     @Test
@@ -239,7 +144,7 @@ class RequestServiceImplTest {
         assertEquals(requestDtoSave, requestDtoTest);
         Mockito.verify(repositoryMock, Mockito.times(1)).save(requestSave);
         Mockito.verify(mapperMock, Mockito.times(1)).toRequestDto(requestSave);
-        Mockito.verify(mapperMock, Mockito.times(1)).toRequest(any(),any(),any());
+        Mockito.verify(mapperMock, Mockito.times(1)).toRequest(any(), any(), any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -286,10 +191,144 @@ class RequestServiceImplTest {
     }
 
     @Test
-    void getOwnRequests() {
+    void getOwnRequests_True_Test() {
+        Long creatorRequestId = 1L;
+
+        when(repositoryMock.findAllById(creatorRequestId,
+                Sort.by(Sort.Direction.DESC, "created")))
+                .thenReturn(requestList);
+        when(userServiceMock.findByIdUser(creatorRequestId)).thenReturn(userDto);
+        when(mapperMock.toRequestDto(requestSave)).thenReturn(requestDtoSave);
+        when(mapperMock.toRequestDto(requestSave2)).thenReturn(requestDtoSave2);
+
+        List<RequestDto> requestDtoListTest = requestService.getOwnRequests(creatorRequestId);
+
+        assertEquals(requestDtoList, requestDtoListTest);
+        Mockito.verify(repositoryMock, Mockito.times(1)).findAllById(creatorRequestId,
+                Sort.by(Sort.Direction.DESC, "created"));
+        Mockito.verify(mapperMock, Mockito.times(2)).toRequestDto(any());
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(creatorRequestId);
+        Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
     @Test
-    void getAllRequests() {
+    void getOwnRequests_False_Test() {
+        Long creatorRequestId = 100L;
+
+        when(userServiceMock.findByIdUser(creatorRequestId))
+                .thenThrow(new NotFoundException("User whit id = " + creatorRequestId + " not found in database."));
+
+        NotFoundException ex = assertThrows(NotFoundException.class, new Executable() {
+            @Override
+            public void execute() throws IOException {
+                requestService.getOwnRequests(creatorRequestId);
+            }
+        });
+
+        assertEquals("User whit id = 100 not found in database.", ex.getMessage());
+        Mockito.verify(repositoryMock, Mockito.times(0)).findAllById(creatorRequestId,
+                Sort.by(Sort.Direction.DESC, "created"));
+        Mockito.verify(mapperMock, Mockito.times(0)).toRequestDto(any());
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(creatorRequestId);
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getAllRequests_True_SizeNull_Test() {
+        Long creatorRequestId = 1L;
+        Integer from = 0;
+        Integer size = null;
+
+        when(userServiceMock.findByIdUser(creatorRequestId)).thenReturn(userDto);
+        when(mapperMock.toRequestDto(requestSave)).thenReturn(requestDtoSave);
+        when(mapperMock.toRequestDto(requestSave2)).thenReturn(requestDtoSave2);
+        when(repositoryMock.findAllByIdNotOrderByCreatedDesc(creatorRequestId)).thenReturn(requestList);
+
+        List<RequestDto> requestDtoListTest = requestService.getAllRequests(creatorRequestId, from, size);
+
+        assertEquals(requestDtoList, requestDtoListTest);
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .findAllByIdNotOrderByCreatedDesc(creatorRequestId);
+        Mockito.verify(mapperMock, Mockito.times(2)).toRequestDto(any());
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(creatorRequestId);
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getAllRequests_True_Test() {
+        Long creatorRequestId = 1L;
+        Integer from = 5;
+        Integer size = 5;
+        Sort sort = Sort.by(Sort.Direction.DESC, "created");
+        Pagination pager = new Pagination(from, size);
+        Pageable pageable = PageRequest.of(1, pager.getPageSize(), sort);
+        Page<Request> requestPage = new PageImpl(List.of(requestSave, requestSave2));
+
+        when(userServiceMock.findByIdUser(creatorRequestId)).thenReturn(userDto);
+        when(mapperMock.toRequestDto(requestSave)).thenReturn(requestDtoSave);
+        when(mapperMock.toRequestDto(requestSave2)).thenReturn(requestDtoSave2);
+        when(repositoryMock.findAllByIdNot(creatorRequestId, pageable)).thenReturn(requestPage);
+
+        List<RequestDto> requestDtoListTest = requestService.getAllRequests(creatorRequestId, from, size);
+
+        assertEquals(requestDtoList, requestDtoListTest);
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .findAllByIdNot(creatorRequestId, pageable);
+        Mockito.verify(mapperMock, Mockito.times(2)).toRequestDto(any());
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(creatorRequestId);
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getAllRequests_False_NotFoundUser_Test() {
+        Long creatorRequestId = 100L;
+        Integer from = 5;
+        Integer size = 5;
+        Sort sort = Sort.by(Sort.Direction.DESC, "created");
+        Pagination pager = new Pagination(from, size);
+        Pageable pageable = PageRequest.of(1, pager.getPageSize(), sort);
+
+        when(userServiceMock.findByIdUser(creatorRequestId))
+                .thenThrow(new NotFoundException("User whit id = " + creatorRequestId + " not found in database."));
+
+        NotFoundException ex = assertThrows(NotFoundException.class, new Executable() {
+            @Override
+            public void execute() throws IOException {
+                requestService.getAllRequests(creatorRequestId, from, size);
+            }
+        });
+
+        assertEquals("User whit id = 100 not found in database.", ex.getMessage());
+        Mockito.verify(repositoryMock, Mockito.times(0))
+                .findAllByIdNot(creatorRequestId, pageable);
+        Mockito.verify(mapperMock, Mockito.times(0)).toRequestDto(any());
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(creatorRequestId);
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getAllRequests_False_SizeLessZero_Test() {
+        Long creatorRequestId = 100L;
+        Integer from = 5;
+        Integer size = -100;
+        Sort sort = Sort.by(Sort.Direction.DESC, "created");
+        Pagination pager = new Pagination(from, 10);
+        Pageable pageable = PageRequest.of(1, pager.getPageSize(), sort);
+
+        when(userServiceMock.findByIdUser(creatorRequestId)).thenReturn(userDto);
+
+        IncorrectParameterException ex = assertThrows(IncorrectParameterException.class, new Executable() {
+            @Override
+            public void execute() throws IOException {
+                requestService.getAllRequests(creatorRequestId, from, size);
+            }
+        });
+
+        assertEquals("from or size", ex.getParameter());
+        Mockito.verify(repositoryMock, Mockito.times(0))
+                .findAllByIdNot(creatorRequestId, pageable);
+        Mockito.verify(mapperMock, Mockito.times(0)).toRequestDto(any());
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(creatorRequestId);
+        Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 }

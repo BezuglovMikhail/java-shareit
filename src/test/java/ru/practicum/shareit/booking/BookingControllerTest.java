@@ -196,7 +196,7 @@ class BookingControllerTest {
         Long userIdTest = 1L;
         String state = "ALL";
         Integer from = 0;
-        Integer size = new Integer(0);
+        Integer size = 0;
 
 
         when(bookingService
