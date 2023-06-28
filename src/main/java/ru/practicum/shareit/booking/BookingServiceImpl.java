@@ -66,30 +66,24 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException("Time of booking is finish!");
         }
 
-        if (booking.getBooker().getId().equals(userId)) {
-            if (!approved) {
-                booking.setStatus(CANCELED);
-                log.info("User whit id = {} cancel booking whit id = {}", userId, bookingId);
-            } else {
-                throw new NotFoundException("Only the owner of the item can APPROVED the booking!");
-            }
-        }
-
-        validatorItemOwner(booking.getItem().getOwner(), userId);
-
-        if (!booking.getStatus().equals(WAITING) &&
-                !booking.getStatus().equals(CANCELED)) {
-            throw new IncorrectParameterException("BookingStatus");
-        }
-        if (approved) {
-            booking.setStatus(APPROVED);
-            log.info("Owner whit id = {} APPROVED booking whit id = {}", userId, bookingId);
+        if (booking.getBooker().getId().equals(userId) && !approved) {
+            booking.setStatus(CANCELED);
+            log.info("User whit id = {} cancel booking whit id = {}", userId, bookingId);
         } else {
-            booking.setStatus(REJECTED);
-            log.info("Owner whit id = {} REJECTED booking whit id = {}", userId, bookingId);
-        }
-        if (booking.getStatus().equals(CANCELED)) {
-            throw new ValidationException("Booking was cancel!");
+
+            validatorItemOwner(booking.getItem().getOwner(), userId);
+
+            if (!booking.getStatus().equals(WAITING) &&
+                    !booking.getStatus().equals(CANCELED)) {
+                throw new IncorrectParameterException("BookingStatus");
+            }
+            if (approved) {
+                booking.setStatus(APPROVED);
+                log.info("Owner whit id = {} APPROVED booking whit id = {}", userId, bookingId);
+            } else {
+                booking.setStatus(REJECTED);
+                log.info("Owner whit id = {} REJECTED booking whit id = {}", userId, bookingId);
+            }
         }
 
         return mapper.toBookingDto(repository.save(booking));
@@ -221,6 +215,20 @@ public class BookingServiceImpl implements BookingService {
         return bookingShortDto;
     }
 
+    @Override
+    public BookingShortDto getNextBooking(Long itemId) {
+        BookingShortDto bookingShortDto =
+                mapper.toBookingShortDto(repository.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(itemId,
+                        LocalDateTime.now(), APPROVED));
+        return bookingShortDto;
+    }
+
+    @Override
+    public Booking getBookingWithUserBookedItem(Long itemId, Long userId) {
+        return repository.findFirstByItem_IdAndBooker_IdAndEndIsBeforeAndStatus(itemId,
+                userId, LocalDateTime.now(), APPROVED);
+    }
+
     private Page<Booking> getPageBookingsOwner(String state, Long userId, Pageable pageable) {
         Page<Booking> page;
         switch (state) {
@@ -251,20 +259,6 @@ public class BookingServiceImpl implements BookingService {
         return page;
     }
 
-    @Override
-    public BookingShortDto getNextBooking(Long itemId) {
-        BookingShortDto bookingShortDto =
-                mapper.toBookingShortDto(repository.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(itemId,
-                        LocalDateTime.now(), APPROVED));
-        return bookingShortDto;
-    }
-
-    @Override
-    public Booking getBookingWithUserBookedItem(Long itemId, Long userId) {
-        return repository.findFirstByItem_IdAndBooker_IdAndEndIsBeforeAndStatus(itemId,
-                userId, LocalDateTime.now(), APPROVED);
-    }
-
     public void validatorCreateBooking(boolean itemAvailable, LocalDateTime startBooking, LocalDateTime endBooking) {
         validatorItemAvailable(itemAvailable);
         validatorStartEndTime(startBooking, endBooking);
@@ -278,7 +272,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = mapper.toBooking(bookingInputDto, itemCheck, userCheck);
 
         if (bookerId.equals(booking.getItem().getOwner())) {
-            throw new NotFoundException("item with id = " + bookingInputDto.getItemId() + " not found in database!");
+            throw new NotFoundException("Owner can`t create booking his item!");
         }
         return booking;
     }

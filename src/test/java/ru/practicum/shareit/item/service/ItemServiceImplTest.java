@@ -28,6 +28,7 @@ import ru.practicum.shareit.user.service.UserService;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -70,8 +71,8 @@ class ItemServiceImplTest {
     Comment comment2;
     CommentDto commentDto2;
     List<CommentDto> commentDtoList = new ArrayList<>();
-    LocalDateTime start = LocalDateTime.of(2023, 6, 27, 12, 00, 0);
-    LocalDateTime end = LocalDateTime.of(2023, 6, 29, 12, 00, 0);
+    LocalDateTime start = LocalDateTime.now().plus(Period.ofDays(1));
+    LocalDateTime end = LocalDateTime.now().plus(Period.ofDays(5));
     Booking booking;
 
     @BeforeEach
@@ -168,27 +169,27 @@ class ItemServiceImplTest {
                 "Супер колотушка, всем соседям понравилась!",
                 itemSave,
                 user,
-                LocalDateTime.of(2023, 6, 27, 15, 00, 0)
+                LocalDateTime.now().minus(Period.ofDays(1))
         );
 
         commentDto = new CommentDto(1L,
                 "Супер колотушка, всем соседям понравилась!",
                 itemSave,
                 "nameTest",
-                LocalDateTime.of(2023, 6, 27, 15, 00, 0));
+                LocalDateTime.now().minus(Period.ofDays(1)));
 
         comment2 = new Comment(2L,
                 "Очень тяжелая!!! Не рекомендую!",
                 itemSave,
                 user,
-                LocalDateTime.of(2023, 6, 27, 20, 00, 0)
+                LocalDateTime.now()
         );
 
         commentDto2 = new CommentDto(2L,
                 "Очень тяжелая!!! Не рекомендую!",
                 itemSave,
                 "nameTest",
-                LocalDateTime.of(2023, 6, 27, 20, 00, 0));
+                LocalDateTime.now());
     }
 
     @Test
@@ -616,7 +617,7 @@ class ItemServiceImplTest {
                 " ",
                 itemSave,
                 "nameTest",
-                LocalDateTime.of(2023, 6, 27, 15, 00, 0));
+                LocalDateTime.now());
 
         IncorrectParameterException ex = assertThrows(IncorrectParameterException.class, new Executable() {
             @Override

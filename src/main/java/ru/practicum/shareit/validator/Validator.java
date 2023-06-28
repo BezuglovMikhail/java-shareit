@@ -69,11 +69,8 @@ public class Validator {
     }
 
     public static boolean validatorItemOwner(Long ownerId, Long userId) {
-        if (ownerId == null) {
-            throw new NotFoundException("User whit id = " + userId + " don`t have items.");
-        }
         if (!Objects.equals(ownerId, userId)) {
-            throw new NotFoundException("Only the owner of the item can APPROVED the booking!");
+            throw new NotFoundException("User whit id = " + userId + " hav`t this item!");
         }
         return true;
     }

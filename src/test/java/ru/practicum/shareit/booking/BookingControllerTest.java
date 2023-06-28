@@ -16,6 +16,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -51,9 +52,8 @@ class BookingControllerTest {
 
     List<BookingDto> bookingDtoList;
 
-    LocalDateTime start = LocalDateTime.of(2023, 6, 21, 12, 00, 0);
-
-    LocalDateTime end = LocalDateTime.of(2023, 6, 25, 12, 00, 0);
+    LocalDateTime start = LocalDateTime.now().plus(Period.ofDays(1));
+    LocalDateTime end = LocalDateTime.now().plus(Period.ofDays(5));
 
     BookingInputDto bookingInputDto = new BookingInputDto(
             1L,

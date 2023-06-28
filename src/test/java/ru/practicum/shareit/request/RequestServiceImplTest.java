@@ -99,7 +99,7 @@ class RequestServiceImplTest {
                 null,
                 commentDtoList);
 
-        createdRequest = LocalDateTime.of(2023, 6, 27, 22, 00, 0);
+        createdRequest = LocalDateTime.now();
 
         requestSave = new Request(
                 1L,

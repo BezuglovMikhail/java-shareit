@@ -14,7 +14,6 @@ import ru.practicum.shareit.request.dto.RequestDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -45,8 +44,6 @@ class RequestControllerTest {
     UserDto userDto;
 
     LocalDateTime created;
-
-    Clock clock;
     RequestDto requestDto;
 
     RequestDto requestDtoUpdate;
@@ -63,7 +60,7 @@ class RequestControllerTest {
 
         userDto = new UserDto(1L, "Потап", "test@mail.com");
 
-        created = LocalDateTime.of(2023, 6, 25, 14, 19, 30);
+        created = LocalDateTime.now();
 
         itemDtoListFull = List.of(
                 new ItemDto(1L,
