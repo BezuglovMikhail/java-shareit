@@ -51,8 +51,6 @@ class RequestServiceImplTest {
     private List<Request> requestList;
     private User user;
     private UserDto userDto;
-    private ItemDto itemDto;
-    private ItemDto itemDto2;
     private LocalDateTime createdRequest;
     private List<ItemDto> itemDtoList;
     private List<CommentDto> commentDtoList;
@@ -76,28 +74,6 @@ class RequestServiceImplTest {
         );
 
         commentDtoList = new ArrayList<>();
-
-        itemDto = new ItemDto(
-                1L,
-                "Колотушка",
-                "Создаёт шум",
-                true,
-                1L,
-                null,
-                null,
-                null,
-                commentDtoList);
-
-        itemDto2 = new ItemDto(
-                2L,
-                "Киянка",
-                "Деревянный молоток",
-                true,
-                1L,
-                1L,
-                null,
-                null,
-                commentDtoList);
 
         createdRequest = LocalDateTime.now();
 
