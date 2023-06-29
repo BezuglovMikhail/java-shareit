@@ -35,6 +35,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static ru.practicum.shareit.booking.BookingStatus.REJECTED;
+import static ru.practicum.shareit.booking.BookingStatus.WAITING;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
@@ -129,7 +131,7 @@ class BookingServiceImplTest {
                 end,
                 itemDto,
                 userDto,
-                BookingStatus.REJECTED
+                REJECTED
         );
 
         bookingInputDtoSave = new BookingInputDto(
@@ -214,7 +216,7 @@ class BookingServiceImplTest {
                 end,
                 item,
                 user,
-                BookingStatus.REJECTED
+                REJECTED
         );
     }
 
@@ -668,7 +670,7 @@ class BookingServiceImplTest {
                 end,
                 item,
                 user,
-                BookingStatus.REJECTED
+                REJECTED
         );
 
         when(repositoryMock.findById(bookingId)).thenReturn(Optional.of(bookingFalse));
@@ -793,7 +795,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void getBookings_True_SizeNull_StateAll_Test() {
+    void getBookings_True_SizeNull_State_ALL_Test() {
         Long userId = 1L;
         Integer from = 5;
         Integer size = null;
@@ -816,6 +818,240 @@ class BookingServiceImplTest {
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1)).findByBookerId(userId, pageable);
         Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookings_True_State_ALL_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "ALL";
+        Sort sort = Sort.by(Sort.Direction.DESC, "start");
+        Pagination pager = new Pagination(from, size);
+        Pageable pageable = PageRequest.of(1, pager.getPageSize(), sort);
+        Page<Booking> bookingPage = new PageImpl(List.of(booking, bookingCansel, bookingReject));
+        List<BookingDto> bookingDtoList = List.of(bookingDtoSave, bookingDtoUpdate2, bookingDtoUpdate3);
+
+        when(repositoryMock.findByBookerId(userId, pageable)).thenReturn(bookingPage);
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
+        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
+        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
+
+        List<BookingDto> bookingDtoListTest = bookingService.getBookings(state, userId, from, size);
+
+        assertEquals(bookingDtoList, bookingDtoListTest);
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(1)).findByBookerId(userId, pageable);
+        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookings_True_State_CURRENT_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "CURRENT";
+        Sort sort = Sort.by(Sort.Direction.ASC, "start");
+        Pagination pager = new Pagination(from, size);
+        Pageable pageable = PageRequest.of(1, pager.getPageSize(), sort);
+        Page<Booking> bookingPage = new PageImpl(List.of(booking, bookingCansel, bookingReject));
+        List<BookingDto> bookingDtoList = List.of(bookingDtoSave, bookingDtoUpdate2, bookingDtoUpdate3);
+
+        when(repositoryMock.findByBookerIdAndStartIsBeforeAndEndIsAfter(any(), any(),
+                any(), any())).thenReturn(bookingPage);
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
+        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
+        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
+
+        List<BookingDto> bookingDtoListTest = bookingService.getBookings(state, userId, from, size);
+
+        assertEquals(bookingDtoList, bookingDtoListTest);
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .findByBookerIdAndStartIsBeforeAndEndIsAfter(any(),  any(), any(), any());
+        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookings_True_State_PAST_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "PAST";
+        Sort sort = Sort.by(Sort.Direction.DESC, "start");
+        Pagination pager = new Pagination(from, size);
+        Pageable pageable = PageRequest.of(1, pager.getPageSize(), sort);
+        Page<Booking> bookingPage = new PageImpl(List.of(booking, bookingCansel, bookingReject));
+        List<BookingDto> bookingDtoList = List.of(bookingDtoSave, bookingDtoUpdate2, bookingDtoUpdate3);
+
+        when(repositoryMock.findByBookerIdAndEndIsBefore(any(), any(), any())).thenReturn(bookingPage);
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
+        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
+        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
+
+        List<BookingDto> bookingDtoListTest = bookingService.getBookings(state, userId, from, size);
+
+        assertEquals(bookingDtoList, bookingDtoListTest);
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .findByBookerIdAndEndIsBefore(any(), any(), any());
+        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookings_True_State_FUTURE_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "FUTURE";
+        Sort sort = Sort.by(Sort.Direction.DESC, "start");
+        Pagination pager = new Pagination(from, size);
+        Pageable pageable = PageRequest.of(1, pager.getPageSize(), sort);
+        Page<Booking> bookingPage = new PageImpl(List.of(booking, bookingCansel, bookingReject));
+        List<BookingDto> bookingDtoList = List.of(bookingDtoSave, bookingDtoUpdate2, bookingDtoUpdate3);
+
+        when(repositoryMock.findByBookerIdAndStartIsAfter(any(), any(), any())).thenReturn(bookingPage);
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
+        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
+        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
+
+        List<BookingDto> bookingDtoListTest = bookingService.getBookings(state, userId, from, size);
+
+        assertEquals(bookingDtoList, bookingDtoListTest);
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .findByBookerIdAndStartIsAfter(any(), any(), any());
+        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookings_True_State_WAITING_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "WAITING";
+        Sort sort = Sort.by(Sort.Direction.DESC, "start");
+        Pagination pager = new Pagination(from, size);
+        Pageable pageable = PageRequest.of(1, pager.getPageSize(), sort);
+        Page<Booking> bookingPage = new PageImpl(List.of(booking));
+        List<BookingDto> bookingDtoList = List.of(bookingDtoSave);
+
+        when(repositoryMock.findByBookerIdAndStatus(userId, WAITING, pageable)).thenReturn(bookingPage);
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
+
+        List<BookingDto> bookingDtoListTest = bookingService.getBookings(state, userId, from, size);
+
+        assertEquals(bookingDtoList, bookingDtoListTest);
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .findByBookerIdAndStatus(userId, WAITING, pageable);
+        Mockito.verify(mapperMock, Mockito.times(1)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookings_True_State_REJECTED_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "REJECTED";
+        Sort sort = Sort.by(Sort.Direction.DESC, "start");
+        Pagination pager = new Pagination(from, size);
+        Pageable pageable = PageRequest.of(1, pager.getPageSize(), sort);
+        Page<Booking> bookingPage = new PageImpl(List.of(bookingReject));
+        List<BookingDto> bookingDtoList = List.of(bookingDtoUpdate3);
+
+        when(repositoryMock.findByBookerIdAndStatus(userId, REJECTED, pageable)).thenReturn(bookingPage);
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
+
+        List<BookingDto> bookingDtoListTest = bookingService.getBookings(state, userId, from, size);
+
+        assertEquals(bookingDtoList, bookingDtoListTest);
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .findByBookerIdAndStatus(userId, REJECTED, pageable);
+        Mockito.verify(mapperMock, Mockito.times(1)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookings_False_NotFoundUser_Test() {
+        Long userId = 100L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "ALL";
+
+        when(userServiceMock.findByIdUser(userId))
+                .thenThrow(new NotFoundException("User whit id = " + userId + " not found in database."));
+
+        NotFoundException ex = assertThrows(NotFoundException.class, new Executable() {
+            @Override
+            public void execute() throws IOException {
+                bookingService.getBookings(state, userId, from, size);
+            }
+        });
+
+        assertEquals("User whit id = 100 not found in database.", ex.getMessage());
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(0)).findByBookerId(any(), any());
+        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookings_False_IncorrectState_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "LIGFGLUKFUK";
+
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+
+        IncorrectParameterException ex = assertThrows(IncorrectParameterException.class, new Executable() {
+            @Override
+            public void execute() throws IOException {
+                bookingService.getBookings(state, userId, from, size);
+            }
+        });
+
+        assertEquals(state, ex.getParameter());
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(0)).findByBookerId(any(), any());
+        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookings_False_SizeNull_IncorrectState_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "LIGFGLUKFUK";
+
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+
+        IncorrectParameterException ex = assertThrows(IncorrectParameterException.class, new Executable() {
+            @Override
+            public void execute() throws IOException {
+                bookingService.getBookings(state, userId, from, size);
+            }
+        });
+
+        assertEquals(state, ex.getParameter());
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(0)).findByBookerId(any(), any());
+        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -843,6 +1079,231 @@ class BookingServiceImplTest {
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1)).findByItem_Owner(userId, pageable);
         Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookingsOwner_True_State_ALL_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "ALL";
+        Sort sort = Sort.by(Sort.Direction.DESC, "start");
+        Pagination pager = new Pagination(from, size);
+        Pageable pageable = PageRequest.of(1, pager.getPageSize(), sort);
+        Page<Booking> bookingPage = new PageImpl(List.of(booking, bookingCansel, bookingReject));
+        List<BookingDto> bookingDtoList = List.of(bookingDtoSave, bookingDtoUpdate2, bookingDtoUpdate3);
+
+        when(repositoryMock.findByItem_Owner(userId, pageable)).thenReturn(bookingPage);
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
+        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
+        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
+
+        List<BookingDto> bookingDtoListTest = bookingService.getBookingsOwner(state, userId, from, size);
+
+        assertEquals(bookingDtoList, bookingDtoListTest);
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(1)).findByItem_Owner(userId, pageable);
+        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookingsOwner_True_State_CURRENT_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "CURRENT";
+        Page<Booking> bookingPage = new PageImpl(List.of(booking, bookingCansel, bookingReject));
+        List<BookingDto> bookingDtoList = List.of(bookingDtoSave, bookingDtoUpdate2, bookingDtoUpdate3);
+
+        when(repositoryMock
+                .findByItem_OwnerAndStartIsBeforeAndEndIsAfter(any(), any(), any(), any())).thenReturn(bookingPage);
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
+        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
+        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
+
+        List<BookingDto> bookingDtoListTest = bookingService.getBookingsOwner(state, userId, from, size);
+
+        assertEquals(bookingDtoList, bookingDtoListTest);
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .findByItem_OwnerAndStartIsBeforeAndEndIsAfter(any(), any(), any(), any());
+        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookingsOwner_True_State_PAST_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "PAST";
+        Page<Booking> bookingPage = new PageImpl(List.of(booking, bookingCansel, bookingReject));
+        List<BookingDto> bookingDtoList = List.of(bookingDtoSave, bookingDtoUpdate2, bookingDtoUpdate3);
+
+        when(repositoryMock.findByItem_OwnerAndEndIsBefore(any(), any(), any())).thenReturn(bookingPage);
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
+        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
+        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
+
+        List<BookingDto> bookingDtoListTest = bookingService.getBookingsOwner(state, userId, from, size);
+
+        assertEquals(bookingDtoList, bookingDtoListTest);
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .findByItem_OwnerAndEndIsBefore(any(), any(), any());
+        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookingsOwner_True_State_FUTURE_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "FUTURE";
+        Page<Booking> bookingPage = new PageImpl(List.of(booking, bookingCansel, bookingReject));
+        List<BookingDto> bookingDtoList = List.of(bookingDtoSave, bookingDtoUpdate2, bookingDtoUpdate3);
+
+        when(repositoryMock.findByItem_OwnerAndStartIsAfter(any(), any(), any())).thenReturn(bookingPage);
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
+        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
+        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
+
+        List<BookingDto> bookingDtoListTest = bookingService.getBookingsOwner(state, userId, from, size);
+
+        assertEquals(bookingDtoList, bookingDtoListTest);
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .findByItem_OwnerAndStartIsAfter(any(), any(), any());
+        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookingsOwner_True_State_WAITING_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "WAITING";
+        Sort sort = Sort.by(Sort.Direction.DESC, "start");
+        Pagination pager = new Pagination(from, size);
+        Pageable pageable = PageRequest.of(1, pager.getPageSize(), sort);
+        Page<Booking> bookingPage = new PageImpl(List.of(booking));
+        List<BookingDto> bookingDtoList = List.of(bookingDtoSave);
+
+        when(repositoryMock.findByItem_OwnerAndStatus(userId, WAITING, pageable)).thenReturn(bookingPage);
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
+
+        List<BookingDto> bookingDtoListTest = bookingService.getBookingsOwner(state, userId, from, size);
+
+        assertEquals(bookingDtoList, bookingDtoListTest);
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .findByItem_OwnerAndStatus(userId, WAITING, pageable);
+        Mockito.verify(mapperMock, Mockito.times(1)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookingsOwner_True_State_REJECTED_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "REJECTED";
+        Sort sort = Sort.by(Sort.Direction.DESC, "start");
+        Pagination pager = new Pagination(from, size);
+        Pageable pageable = PageRequest.of(1, pager.getPageSize(), sort);
+        Page<Booking> bookingPage = new PageImpl(List.of(bookingReject));
+        List<BookingDto> bookingDtoList = List.of(bookingDtoUpdate3);
+
+        when(repositoryMock.findByItem_OwnerAndStatus(userId, REJECTED, pageable)).thenReturn(bookingPage);
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
+
+        List<BookingDto> bookingDtoListTest = bookingService.getBookingsOwner(state, userId, from, size);
+
+        assertEquals(bookingDtoList, bookingDtoListTest);
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .findByItem_OwnerAndStatus(userId, REJECTED, pageable);
+        Mockito.verify(mapperMock, Mockito.times(1)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookingsOwner_False_NotFoundUser_Test() {
+        Long userId = 100L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "ALL";
+
+        when(userServiceMock.findByIdUser(userId))
+                .thenThrow(new NotFoundException("User whit id = " + userId + " not found in database."));
+
+        NotFoundException ex = assertThrows(NotFoundException.class, new Executable() {
+            @Override
+            public void execute() throws IOException {
+                bookingService.getBookingsOwner(state, userId, from, size);
+            }
+        });
+
+        assertEquals("User whit id = 100 not found in database.", ex.getMessage());
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(0)).findByItem_Owner(any(), any());
+        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookingsOwner_False_IncorrectState_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "LIGFGLUKFUK";
+
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+
+        IncorrectParameterException ex = assertThrows(IncorrectParameterException.class, new Executable() {
+            @Override
+            public void execute() throws IOException {
+                bookingService.getBookingsOwner(state, userId, from, size);
+            }
+        });
+
+        assertEquals(state, ex.getParameter());
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(0)).findByItem_Owner(any(), any());
+        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(any());
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void getBookingsOwner_False_SizeNull_IncorrectState_Test() {
+        Long userId = 1L;
+        Integer from = 5;
+        Integer size = 10;
+        String state = "LIGFGLUKFUK";
+
+        when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
+
+        IncorrectParameterException ex = assertThrows(IncorrectParameterException.class, new Executable() {
+            @Override
+            public void execute() throws IOException {
+                bookingService.getBookingsOwner(state, userId, from, size);
+            }
+        });
+
+        assertEquals(state, ex.getParameter());
+        Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
+        Mockito.verify(repositoryMock, Mockito.times(0)).findByItem_Owner(any(), any());
+        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
