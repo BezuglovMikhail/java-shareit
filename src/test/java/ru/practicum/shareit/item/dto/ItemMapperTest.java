@@ -102,7 +102,7 @@ class ItemMapperTest {
                 "Супер колотушка, всем соседям понравилась!",
                 itemSave,
                 "nameTest",
-                LocalDateTime.now().minus(Period.ofDays(1)));
+                comment.getCreated());
     }
 
     @Test
