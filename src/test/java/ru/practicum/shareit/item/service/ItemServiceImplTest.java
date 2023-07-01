@@ -68,8 +68,10 @@ class ItemServiceImplTest {
     Comment comment2;
     CommentDto commentDto2;
     List<CommentDto> commentDtoList = new ArrayList<>();
-    LocalDateTime start = LocalDateTime.now().plus(Period.ofDays(1));
-    LocalDateTime end = LocalDateTime.now().plus(Period.ofDays(5));
+
+    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime start = now.plus(Period.ofDays(1));
+    LocalDateTime end = now.plus(Period.ofDays(5));
     Booking booking;
 
     @BeforeEach
@@ -151,6 +153,8 @@ class ItemServiceImplTest {
         itemList = List.of(itemSave, itemSave2);
         itemDtoList = List.of(itemDtoSave, itemDtoSave2);
 
+
+
         booking = new Booking(
                 1L,
                 start,
@@ -165,27 +169,27 @@ class ItemServiceImplTest {
                 "Супер колотушка, всем соседям понравилась!",
                 itemSave,
                 user,
-                LocalDateTime.now().minus(Period.ofDays(1))
+                now.minus(Period.ofDays(1))
         );
 
         commentDto = new CommentDto(1L,
                 "Супер колотушка, всем соседям понравилась!",
                 itemSave,
                 "nameTest",
-                LocalDateTime.now().minus(Period.ofDays(1)));
+                now.minus(Period.ofDays(1)));
 
         comment2 = new Comment(2L,
                 "Очень тяжелая!!! Не рекомендую!",
                 itemSave,
                 user,
-                LocalDateTime.now()
+                now
         );
 
         commentDto2 = new CommentDto(2L,
                 "Очень тяжелая!!! Не рекомендую!",
                 itemSave,
                 "nameTest",
-                LocalDateTime.now());
+                now);
     }
 
     @Test
