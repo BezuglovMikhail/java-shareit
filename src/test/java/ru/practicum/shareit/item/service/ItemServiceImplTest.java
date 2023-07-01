@@ -17,7 +17,6 @@ import ru.practicum.shareit.exeption.IncorrectParameterException;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
@@ -635,12 +634,12 @@ class ItemServiceImplTest {
     @Test
     void getItemsByRequestId_True_Test() {
         Long requestId = 1L;
-        Long itemId_1 = 1L;
-        Long itemId_2 = 2L;
+        Long itemIdFirst = 1L;
+        Long itemIdSecond = 2L;
 
         when(itemRepositoryMock.findAllByRequestId(any(), any())).thenReturn(itemList);
-        when(itemService.getCommentsByItemId(itemId_1)).thenReturn(commentDtoList);
-        when(itemService.getCommentsByItemId(itemId_2)).thenReturn(commentDtoList);
+        when(itemService.getCommentsByItemId(itemIdFirst)).thenReturn(commentDtoList);
+        when(itemService.getCommentsByItemId(itemIdSecond)).thenReturn(commentDtoList);
 
         List<ItemDto> itemDtoListTest = itemService.getItemsByRequestId(requestId);
 

@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @JsonTest
 @ExtendWith(MockitoExtension.class)
-class RequestDtoSerializeTest {
+class RequestDtoTest {
     @Autowired
     private ObjectMapper objectMapper;
 
