@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
-import static ru.practicum.shareit.booking.dto.BookingMapper.*;
+import static ru.practicum.shareit.booking.BookingMapper.*;
 import static ru.practicum.shareit.booking.BookingStatus.*;
 import static ru.practicum.shareit.item.dto.ItemMapper.toItem;
 import static ru.practicum.shareit.item.dto.ItemMapper.toItemDto;

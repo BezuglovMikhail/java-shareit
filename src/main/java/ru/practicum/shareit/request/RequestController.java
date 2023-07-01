@@ -8,7 +8,7 @@ import ru.practicum.shareit.request.dto.RequestDto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static ru.practicum.shareit.Constant.USER_ID;
+import static ru.practicum.shareit.user.Constant.USER_ID;
 
 @Slf4j
 @RestController

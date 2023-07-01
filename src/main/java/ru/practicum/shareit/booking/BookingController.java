@@ -8,7 +8,7 @@ import ru.practicum.shareit.booking.dto.BookingInputDto;
 
 import java.util.List;
 
-import static ru.practicum.shareit.Constant.USER_ID;
+import static ru.practicum.shareit.user.Constant.USER_ID;
 
 @RestController
 @RequestMapping(path = "/bookings")

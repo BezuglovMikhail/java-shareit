@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
-import static ru.practicum.shareit.request.dto.RequestMapper.toRequest;
-import static ru.practicum.shareit.request.dto.RequestMapper.toRequestDto;
+import static ru.practicum.shareit.request.RequestMapper.toRequest;
+import static ru.practicum.shareit.request.RequestMapper.toRequestDto;
 import static ru.practicum.shareit.user.dto.UserMapper.toUser;
 import static ru.practicum.shareit.validator.Validator.validatorRequestDescription;
 import static ru.practicum.shareit.validator.Validator.validatorRequestSize;

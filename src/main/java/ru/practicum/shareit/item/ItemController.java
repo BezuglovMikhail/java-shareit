@@ -10,7 +10,7 @@ import ru.practicum.shareit.item.service.ItemService;
 import javax.validation.Valid;
 import java.util.List;
 
-import static ru.practicum.shareit.Constant.USER_ID;
+import static ru.practicum.shareit.user.Constant.USER_ID;
 
 @RestController
 @RequestMapping("/items")
