@@ -24,7 +24,7 @@ class RequestDtoTest {
         UserDto userDto = new UserDto(
                 5L,
                 "nameSerialize",
-                "emailSerialize"
+                "emailSerialize@mail.com"
         );
 
         RequestDto requestDtoSerialize = new RequestDto(
@@ -39,7 +39,7 @@ class RequestDtoTest {
                 "\"description\":\"descriptionSerialize\"," +
                 "\"creator\":{\"id\":5," +
                 "\"name\":\"nameSerialize\"," +
-                "\"email\":\"emailSerialize\"}," +
+                "\"email\":\"emailSerialize@mail.com\"}," +
                 "\"created\":\"2023-07-01T17:28:00\"," +
                 "\"items\":[]}";
 
@@ -52,14 +52,14 @@ class RequestDtoTest {
                 "\"description\":\"descriptionSerialize\"," +
                 "\"creator\":{\"id\":5," +
                 "\"name\":\"nameSerialize\"," +
-                "\"email\":\"emailSerialize\"}," +
+                "\"email\":\"emailSerialize@mail.com\"}," +
                 "\"created\":\"2023-07-01T17:28:00\"," +
                 "\"items\":[]}";
 
         UserDto userDto = new UserDto(
                 5L,
                 "nameSerialize",
-                "emailSerialize"
+                "emailSerialize@mail.com"
         );
 
         RequestDto requestDto = new RequestDto(

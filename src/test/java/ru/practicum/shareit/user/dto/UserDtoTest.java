@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @JsonTest
 @ExtendWith(MockitoExtension.class)
-class userDtoTest {
+class UserDtoTest {
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -22,22 +22,22 @@ class userDtoTest {
         UserDto userDtoSerialize = new UserDto(
                 5L,
                 "nameSerialize",
-                "emailSerialize"
+                "emailSerialize@mail.com"
         );
 
-        String expectedResult = "{\"id\":5,\"name\":\"nameSerialize\",\"email\":\"emailSerialize\"}";
+        String expectedResult = "{\"id\":5,\"name\":\"nameSerialize\",\"email\":\"emailSerialize@mail.com\"}";
 
         assertEquals(expectedResult, objectMapper.writeValueAsString(userDtoSerialize));
     }
 
     @Test
     void testDeserializeTest() throws Exception {
-        String usrdDtoString = "{\"id\":5,\"name\":\"nameSerialize\",\"email\":\"emailSerialize\"}";
+        String usrdDtoString = "{\"id\":5,\"name\":\"nameSerialize\",\"email\":\"emailSerialize@mail.com\"}";
 
         UserDto userDtoTest = new UserDto(
                 5L,
                 "nameSerialize",
-                "emailSerialize"
+                "emailSerialize@mail.com"
         );
 
         UserDto expectedResult = objectMapper.readValue(usrdDtoString, UserDto.class);
