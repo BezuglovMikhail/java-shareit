@@ -20,40 +20,42 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
+import static ru.practicum.shareit.booking.BookingMapper.*;
 import static ru.practicum.shareit.booking.BookingStatus.*;
+import static ru.practicum.shareit.item.dto.ItemMapper.toItem;
+import static ru.practicum.shareit.item.dto.ItemMapper.toItemDto;
+import static ru.practicum.shareit.user.dto.UserMapper.toUser;
+import static ru.practicum.shareit.user.dto.UserMapper.toUserDto;
 import static ru.practicum.shareit.validator.Validator.*;
 
 @Slf4j
 @Service
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository repository;
-
     private UserService userService;
     private ItemService itemService;
-    private final BookingMapper mapper;
 
     @Autowired
     @Lazy
     public BookingServiceImpl(BookingRepository bookingRepository,
                               UserService userService,
-                              ItemService itemService,
-                              BookingMapper bookingMapper) {
+                              ItemService itemService) {
         this.repository = bookingRepository;
         this.userService = userService;
         this.itemService = itemService;
-        this.mapper = bookingMapper;
     }
 
     @Override
     public BookingDto save(BookingInputDto bookingInputDto, Long bookerId) {
         Booking booking = createBooking(bookingInputDto, bookerId);
-        return mapper.toBookingDto(repository.save(booking));
+        return toBookingDto(repository.save(booking),
+                toItemDto(booking.getItem(), itemService.getCommentsByItemId(booking.getItem().getId())),
+                toUserDto(booking.getBooker()));
     }
 
     @Override
@@ -86,7 +88,9 @@ public class BookingServiceImpl implements BookingService {
             }
         }
 
-        return mapper.toBookingDto(repository.save(booking));
+        return toBookingDto(repository.save(booking),
+                toItemDto(booking.getItem(), itemService.getCommentsByItemId(booking.getItem().getId())),
+                toUserDto(booking.getBooker()));
     }
 
     @Override
@@ -96,7 +100,9 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException("Booking whit id = " + bookingId + " not found in database!"));
         if (booking.getBooker().getId().equals(userId) || validatorItemOwner(booking.getItem().getOwner(), userId)) {
 
-            return mapper.toBookingDto(booking);
+            return toBookingDto(booking,
+                    toItemDto(booking.getItem(), itemService.getCommentsByItemId(booking.getItem().getId())),
+                    toUserDto(booking.getBooker()));
 
         } else {
             throw new NotFoundException("Only owner or booker can view information of booking." +
@@ -118,7 +124,10 @@ public class BookingServiceImpl implements BookingService {
                     PageRequest.of(pager.getIndex(), pager.getPageSize(), sortByStartDesc);
             do {
                 page = getPageBookings(state, userId, pageable);
-                bookings.addAll(page.stream().map(mapper::toBookingDto).collect(toList()));
+                bookings.addAll(page.stream()
+                        .map(x -> toBookingDto(x, toItemDto(x.getItem(),
+                                        itemService.getCommentsByItemId(x.getItem().getId())),
+                                toUserDto(x.getBooker()))).collect(toList()));
                 pageable = pageable.next();
             } while (page.hasNext());
 
@@ -127,7 +136,9 @@ public class BookingServiceImpl implements BookingService {
                 pageable =
                         PageRequest.of(i, pager.getPageSize(), sortByStartDesc);
                 page = getPageBookings(state, userId, pageable);
-                bookings.addAll(page.stream().map(mapper::toBookingDto).collect(toList()));
+                bookings.addAll(page.stream().map(x -> toBookingDto(x, toItemDto(x.getItem(),
+                                itemService.getCommentsByItemId(x.getItem().getId())),
+                        toUserDto(x.getBooker()))).collect(toList()));
                 if (!page.hasNext()) {
                     break;
                 }
@@ -184,7 +195,9 @@ public class BookingServiceImpl implements BookingService {
                     PageRequest.of(pager.getIndex(), pager.getPageSize(), sortByStartDesc);
             do {
                 page = getPageBookingsOwner(state, userId, pageable);
-                bookings.addAll(page.stream().map(mapper::toBookingDto).collect(toList()));
+                bookings.addAll(page.stream().map(x -> toBookingDto(x, toItemDto(x.getItem(),
+                                itemService.getCommentsByItemId(x.getItem().getId())),
+                        toUserDto(x.getBooker()))).collect(toList()));
                 pageable = pageable.next();
             } while (page.hasNext());
 
@@ -193,7 +206,9 @@ public class BookingServiceImpl implements BookingService {
                 pageable =
                         PageRequest.of(i, pager.getPageSize(), sortByStartDesc);
                 page = getPageBookingsOwner(state, userId, pageable);
-                bookings.addAll(page.stream().map(mapper::toBookingDto).collect(toList()));
+                bookings.addAll(page.stream().map(x -> toBookingDto(x, toItemDto(x.getItem(),
+                                itemService.getCommentsByItemId(x.getItem().getId())),
+                        toUserDto(x.getBooker()))).collect(toList()));
                 if (!page.hasNext()) {
                     break;
                 }
@@ -206,7 +221,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingShortDto getLastBooking(Long itemId) {
         BookingShortDto bookingShortDto =
-                mapper.toBookingShortDto(
+                toBookingShortDto(
                         repository.findFirstByItem_IdAndStartBeforeAndStatusOrderByEndDesc(
                                 itemId,
                                 LocalDateTime.now(),
@@ -218,7 +233,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingShortDto getNextBooking(Long itemId) {
         BookingShortDto bookingShortDto =
-                mapper.toBookingShortDto(repository.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(itemId,
+                toBookingShortDto(repository.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(itemId,
                         LocalDateTime.now(), APPROVED));
         return bookingShortDto;
     }
@@ -269,7 +284,7 @@ public class BookingServiceImpl implements BookingService {
         UserDto userCheck = userService.findByIdUser(bookerId);
         validatorCreateBooking(itemCheck.getAvailable(), bookingInputDto.getStart(), bookingInputDto.getEnd());
 
-        Booking booking = mapper.toBooking(bookingInputDto, itemCheck, userCheck);
+        Booking booking = toBooking(bookingInputDto, toItem(itemCheck), toUser(userCheck));
 
         if (bookerId.equals(booking.getItem().getOwner())) {
             throw new NotFoundException("Owner can`t create booking his item!");

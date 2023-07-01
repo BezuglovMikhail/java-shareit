@@ -14,8 +14,8 @@ import ru.practicum.shareit.exeption.IncorrectParameterException;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.dto.RequestDto;
-import ru.practicum.shareit.request.dto.RequestMapper;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
@@ -33,19 +33,18 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class RequestServiceImplTest {
-
     @Mock
     private RequestRepository repositoryMock;
     @Mock
-    private RequestMapper mapperMock;
-    @Mock
     private UserService userServiceMock;
-
+    @Mock
+    private ItemService itemServiceMock;
     private RequestService requestService;
     private RequestDto requestDtoSave;
     private RequestDto requestDtoSave2;
     private RequestDto requestDtoDescriptionEmpty;
     private Request requestSave;
+    private Request request;
     private Request requestSave2;
     private List<RequestDto> requestDtoList;
     private List<Request> requestList;
@@ -59,8 +58,8 @@ class RequestServiceImplTest {
     void setUp() {
         requestService = new RequestServiceImpl(
                 repositoryMock,
-                mapperMock,
-                userServiceMock);
+                userServiceMock,
+                itemServiceMock);
 
         user = new User(
                 1L,
@@ -74,11 +73,17 @@ class RequestServiceImplTest {
         );
 
         commentDtoList = new ArrayList<>();
+        itemDtoList = new ArrayList<>();
 
         createdRequest = LocalDateTime.now();
 
         requestSave = new Request(
                 1L,
+                "Нужна мощная штука, чтобы аккуратно собирать мебель, желательно из дерева.",
+                user,
+                createdRequest);
+        request = new Request(
+                null,
                 "Нужна мощная штука, чтобы аккуратно собирать мебель, желательно из дерева.",
                 user,
                 createdRequest);
@@ -111,16 +116,13 @@ class RequestServiceImplTest {
     void create_True_Test() {
         Long creatorRequestId = 1L;
 
-        when(repositoryMock.save(any())).thenReturn(requestSave);
-        when(mapperMock.toRequest(requestDtoSave, creatorRequestId, createdRequest)).thenReturn(requestSave);
-        when(mapperMock.toRequestDto(requestSave)).thenReturn(requestDtoSave);
+        when(repositoryMock.save(request)).thenReturn(requestSave);
+        when(userServiceMock.findByIdUser(creatorRequestId)).thenReturn(userDto);
 
         RequestDto requestDtoTest = requestService.create(requestDtoSave, creatorRequestId, createdRequest);
 
         assertEquals(requestDtoSave, requestDtoTest);
-        Mockito.verify(repositoryMock, Mockito.times(1)).save(requestSave);
-        Mockito.verify(mapperMock, Mockito.times(1)).toRequestDto(requestSave);
-        Mockito.verify(mapperMock, Mockito.times(1)).toRequest(any(), any(), any());
+        Mockito.verify(repositoryMock, Mockito.times(1)).save(request);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -144,7 +146,6 @@ class RequestServiceImplTest {
 
         assertEquals("description", ex.getParameter());
         Mockito.verify(repositoryMock, Mockito.times(0)).save(requestSave);
-        Mockito.verify(mapperMock, Mockito.times(0)).toRequestDto(requestSave);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -155,13 +156,11 @@ class RequestServiceImplTest {
 
         when(repositoryMock.findById(any())).thenReturn(Optional.of(requestSave));
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toRequestDto(requestSave)).thenReturn(requestDtoSave);
 
         RequestDto requestDtoTest = requestService.getRequestById(requestId, userId);
 
         assertEquals(requestDtoSave, requestDtoTest);
         Mockito.verify(repositoryMock, Mockito.times(1)).findById(requestId);
-        Mockito.verify(mapperMock, Mockito.times(1)).toRequestDto(requestSave);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
@@ -174,15 +173,12 @@ class RequestServiceImplTest {
                 Sort.by(Sort.Direction.DESC, "created")))
                 .thenReturn(requestList);
         when(userServiceMock.findByIdUser(creatorRequestId)).thenReturn(userDto);
-        when(mapperMock.toRequestDto(requestSave)).thenReturn(requestDtoSave);
-        when(mapperMock.toRequestDto(requestSave2)).thenReturn(requestDtoSave2);
 
         List<RequestDto> requestDtoListTest = requestService.getOwnRequests(creatorRequestId);
 
         assertEquals(requestDtoList, requestDtoListTest);
         Mockito.verify(repositoryMock, Mockito.times(1)).findAllById(creatorRequestId,
                 Sort.by(Sort.Direction.DESC, "created"));
-        Mockito.verify(mapperMock, Mockito.times(2)).toRequestDto(any());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(creatorRequestId);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
@@ -204,7 +200,6 @@ class RequestServiceImplTest {
         assertEquals("User whit id = 100 not found in database.", ex.getMessage());
         Mockito.verify(repositoryMock, Mockito.times(0)).findAllById(creatorRequestId,
                 Sort.by(Sort.Direction.DESC, "created"));
-        Mockito.verify(mapperMock, Mockito.times(0)).toRequestDto(any());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(creatorRequestId);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
@@ -216,8 +211,6 @@ class RequestServiceImplTest {
         Integer size = null;
 
         when(userServiceMock.findByIdUser(creatorRequestId)).thenReturn(userDto);
-        when(mapperMock.toRequestDto(requestSave)).thenReturn(requestDtoSave);
-        when(mapperMock.toRequestDto(requestSave2)).thenReturn(requestDtoSave2);
         when(repositoryMock.findAllByIdNotOrderByCreatedDesc(creatorRequestId)).thenReturn(requestList);
 
         List<RequestDto> requestDtoListTest = requestService.getAllRequests(creatorRequestId, from, size);
@@ -225,7 +218,6 @@ class RequestServiceImplTest {
         assertEquals(requestDtoList, requestDtoListTest);
         Mockito.verify(repositoryMock, Mockito.times(1))
                 .findAllByIdNotOrderByCreatedDesc(creatorRequestId);
-        Mockito.verify(mapperMock, Mockito.times(2)).toRequestDto(any());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(creatorRequestId);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
@@ -241,8 +233,6 @@ class RequestServiceImplTest {
         Page<Request> requestPage = new PageImpl(List.of(requestSave, requestSave2));
 
         when(userServiceMock.findByIdUser(creatorRequestId)).thenReturn(userDto);
-        when(mapperMock.toRequestDto(requestSave)).thenReturn(requestDtoSave);
-        when(mapperMock.toRequestDto(requestSave2)).thenReturn(requestDtoSave2);
         when(repositoryMock.findAllByIdNot(creatorRequestId, pageable)).thenReturn(requestPage);
 
         List<RequestDto> requestDtoListTest = requestService.getAllRequests(creatorRequestId, from, size);
@@ -250,7 +240,6 @@ class RequestServiceImplTest {
         assertEquals(requestDtoList, requestDtoListTest);
         Mockito.verify(repositoryMock, Mockito.times(1))
                 .findAllByIdNot(creatorRequestId, pageable);
-        Mockito.verify(mapperMock, Mockito.times(2)).toRequestDto(any());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(creatorRequestId);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
@@ -277,7 +266,6 @@ class RequestServiceImplTest {
         assertEquals("User whit id = 100 not found in database.", ex.getMessage());
         Mockito.verify(repositoryMock, Mockito.times(0))
                 .findAllByIdNot(creatorRequestId, pageable);
-        Mockito.verify(mapperMock, Mockito.times(0)).toRequestDto(any());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(creatorRequestId);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
@@ -303,7 +291,6 @@ class RequestServiceImplTest {
         assertEquals("from or size", ex.getParameter());
         Mockito.verify(repositoryMock, Mockito.times(0))
                 .findAllByIdNot(creatorRequestId, pageable);
-        Mockito.verify(mapperMock, Mockito.times(0)).toRequestDto(any());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(creatorRequestId);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }

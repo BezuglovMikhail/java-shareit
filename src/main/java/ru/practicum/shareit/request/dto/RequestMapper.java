@@ -1,43 +1,32 @@
 package ru.practicum.shareit.request.dto;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.request.Request;
-import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 public class RequestMapper {
 
-    private UserMapper userMapper;
-    private UserService userService;
-    private ItemService itemService;
-
-    @Autowired
-    public RequestMapper(UserMapper userMapper, UserService userService, ItemService itemService) {
-        this.userMapper = userMapper;
-        this.userService = userService;
-        this.itemService = itemService;
-    }
-
-    public RequestDto toRequestDto(Request request) {
+    public static RequestDto toRequestDto(Request request, UserDto userDto, List<ItemDto> itemDtoList) {
         return new RequestDto(
                 request.getId(),
                 request.getDescription(),
-                userMapper.toUserDto(request.getCreatorRequest()),
+                userDto,
                 request.getCreated(),
-                itemService.getItemsByRequestId(request.getId())
+                itemDtoList
         );
     }
 
-    public Request toRequest(RequestDto requestDto, Long creatorRequestId, LocalDateTime createdTime) {
+    public static Request toRequest(RequestDto requestDto, User user, LocalDateTime createdTime) {
         return new Request(
                 null,
                 requestDto.getDescription(),
-                userMapper.toUser(userService.findByIdUser(creatorRequestId)),
+                user,
                 createdTime
         );
     }

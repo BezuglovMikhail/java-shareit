@@ -8,11 +8,12 @@ import ru.practicum.shareit.request.dto.RequestDto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static ru.practicum.shareit.Constant.USER_ID;
+
 @Slf4j
 @RestController
 @RequestMapping(path = "/requests")
 public class RequestController {
-    private static final String USER_ID = "X-Sharer-User-Id";
     private final RequestService service;
 
     @Autowired

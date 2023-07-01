@@ -1,34 +1,25 @@
 package ru.practicum.shareit.booking;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserMapper;
+import ru.practicum.shareit.user.model.User;
 
 @Component
 public class BookingMapper {
-    private ItemMapper itemMapper;
-    private UserMapper userMapper;
 
-    @Autowired
-    public BookingMapper(ItemMapper itemMapper, UserMapper userMapper) {
-        this.itemMapper = itemMapper;
-        this.userMapper = userMapper;
-    }
-
-    public BookingDto toBookingDto(Booking booking) {
+    public static BookingDto toBookingDto(Booking booking, ItemDto itemDto, UserDto userDto) {
         if (booking != null) {
             return new BookingDto(
                     booking.getId(),
                     booking.getStart(),
                     booking.getEnd(),
-                    itemMapper.toItemDto(booking.getItem()),
-                    userMapper.toUserDto(booking.getBooker()),
+                    itemDto,
+                    userDto,
                     booking.getStatus()
             );
         } else {
@@ -49,13 +40,13 @@ public class BookingMapper {
         }
     }
 
-    public Booking toBooking(BookingInputDto bookingInputDto, ItemDto item, UserDto user) {
+    public static Booking toBooking(BookingInputDto bookingInputDto, Item item, User user) {
         return new Booking(
                 null,
                 bookingInputDto.getStart(),
                 bookingInputDto.getEnd(),
-                itemMapper.toItem(item),
-                userMapper.toUser(user),
+                item,
+                user,
                 BookingStatus.WAITING
         );
     }

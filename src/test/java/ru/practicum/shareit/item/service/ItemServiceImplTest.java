@@ -47,8 +47,6 @@ class ItemServiceImplTest {
     @Mock
     private BookingService bookingServiceMock;
     @Mock
-    private ItemMapper mapperMock;
-    @Mock
     private ItemRepository itemRepositoryMock;
     @Mock
     private CommentRepository commentRepositoryMock;
@@ -80,8 +78,7 @@ class ItemServiceImplTest {
         itemService = new ItemServiceImpl(itemRepositoryMock,
                 commentRepositoryMock,
                 userServiceMock,
-                bookingServiceMock,
-                mapperMock);
+                bookingServiceMock);
 
         itemSave = new Item(
                 1L,
@@ -198,16 +195,12 @@ class ItemServiceImplTest {
 
         when(itemRepositoryMock.save(any())).thenReturn(itemSave);
         when(userServiceMock.findByIdUser(ownerId)).thenReturn(userDto);
-        when(mapperMock.toItem(itemDtoSave)).thenReturn(itemSave);
-        when(mapperMock.toItemDto(itemSave)).thenReturn(itemDtoSave);
 
         ItemDto itemDtoTest = itemService.save(itemDtoSave, ownerId);
 
         assertEquals(itemDtoSave, itemDtoTest);
         Mockito.verify(itemRepositoryMock, Mockito.times(1)).save(itemSave);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(ownerId);
-        Mockito.verify(mapperMock, Mockito.times(1)).toItem(itemDtoSave);
-        Mockito.verify(mapperMock, Mockito.times(1)).toItemDto(itemSave);
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -236,8 +229,6 @@ class ItemServiceImplTest {
         assertEquals("available", ex.getParameter());
         Mockito.verify(itemRepositoryMock, Mockito.times(0)).save(itemSave);
         Mockito.verify(userServiceMock, Mockito.times(0)).findByIdUser(ownerId);
-        Mockito.verify(mapperMock, Mockito.times(0)).toItem(itemDtoSave);
-        Mockito.verify(mapperMock, Mockito.times(0)).toItemDto(itemSave);
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -266,8 +257,6 @@ class ItemServiceImplTest {
         assertEquals("name", ex.getParameter());
         Mockito.verify(itemRepositoryMock, Mockito.times(0)).save(itemSave);
         Mockito.verify(userServiceMock, Mockito.times(0)).findByIdUser(ownerId);
-        Mockito.verify(mapperMock, Mockito.times(0)).toItem(itemDtoSave);
-        Mockito.verify(mapperMock, Mockito.times(0)).toItemDto(itemSave);
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -296,8 +285,6 @@ class ItemServiceImplTest {
         assertEquals("description", ex.getParameter());
         Mockito.verify(itemRepositoryMock, Mockito.times(0)).save(itemSave);
         Mockito.verify(userServiceMock, Mockito.times(0)).findByIdUser(ownerId);
-        Mockito.verify(mapperMock, Mockito.times(0)).toItem(itemDtoSave);
-        Mockito.verify(mapperMock, Mockito.times(0)).toItemDto(itemSave);
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -317,9 +304,7 @@ class ItemServiceImplTest {
 
         assertEquals("User whit id = " + ownerId + " not found in database.", ex.getMessage());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(ownerId);
-        Mockito.verify(mapperMock, Mockito.times(0)).toItem(itemDtoSave);
         Mockito.verify(itemRepositoryMock, Mockito.times(0)).save(itemSave);
-        Mockito.verify(mapperMock, Mockito.times(0)).toItemDto(itemSave);
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -331,8 +316,6 @@ class ItemServiceImplTest {
         when(itemRepositoryMock.findById(1L)).thenReturn(Optional.of(itemSave));
         when(itemRepositoryMock.findById(2L)).thenReturn(Optional.of(itemSave2));
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toItemExtDto(itemSave, lastBooking, nextBooking, commentDtoList)).thenReturn(itemDtoSave);
-        when(mapperMock.toItemExtDto(itemSave2, lastBooking, nextBooking, commentDtoList)).thenReturn(itemDtoSave2);
         when(bookingServiceMock.getLastBooking(any(Long.class))).thenReturn(lastBooking);
         when(bookingServiceMock.getNextBooking(any(Long.class))).thenReturn(nextBooking);
 
@@ -353,8 +336,6 @@ class ItemServiceImplTest {
         when(itemRepositoryMock.findById(1L)).thenReturn(Optional.of(itemSave));
         when(itemRepositoryMock.findById(2L)).thenReturn(Optional.of(itemSave2));
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toItemDto(itemSave)).thenReturn(itemDtoSave);
-        when(mapperMock.toItemDto(itemSave2)).thenReturn(itemDtoSave2);
 
         List<ItemDto> itemDtoListTest = itemService.findAllItemByIdUser(userId);
 
@@ -362,7 +343,6 @@ class ItemServiceImplTest {
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(itemRepositoryMock, Mockito.times(1)).findByOwner(userId);
         Mockito.verify(itemRepositoryMock, Mockito.times(2)).findById(any(Long.class));
-        Mockito.verify(mapperMock, Mockito.times(2)).toItemDto(any());
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -382,9 +362,7 @@ class ItemServiceImplTest {
 
         assertEquals("User whit id = " + userId + " not found in database.", ex.getMessage());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
-        Mockito.verify(mapperMock, Mockito.times(0)).toItem(any());
         Mockito.verify(itemRepositoryMock, Mockito.times(0)).findByOwner(any());
-        Mockito.verify(mapperMock, Mockito.times(0)).toItemDto(any());
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -393,13 +371,11 @@ class ItemServiceImplTest {
         Long itemId = 1L;
 
         when(itemRepositoryMock.findById(itemId)).thenReturn(Optional.of(itemSave));
-        when(mapperMock.toItemDto(itemSave)).thenReturn(itemDtoSave);
 
         ItemDto itemDtoTest = itemService.findById(itemId);
 
         assertEquals(itemDtoSave, itemDtoTest);
         Mockito.verify(itemRepositoryMock, Mockito.times(1)).findById(itemId);
-        Mockito.verify(mapperMock, Mockito.times(1)).toItemDto(itemSave);
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -418,7 +394,6 @@ class ItemServiceImplTest {
 
         assertEquals("Item whit с id = 10 not found in database.", ex.getMessage());
         Mockito.verify(itemRepositoryMock, Mockito.times(1)).findById(itemId);
-        Mockito.verify(mapperMock, Mockito.times(0)).toItemDto(any());
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -435,7 +410,6 @@ class ItemServiceImplTest {
 
         assertEquals("itemId", ex.getParameter());
         Mockito.verify(itemRepositoryMock, Mockito.times(0)).findById(any());
-        Mockito.verify(mapperMock, Mockito.times(0)).toItemDto(any());
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -456,7 +430,6 @@ class ItemServiceImplTest {
 
         assertEquals("Item whit с id = 10 not found in database.", ex.getMessage());
         Mockito.verify(itemRepositoryMock, Mockito.times(1)).findById(itemId);
-        Mockito.verify(mapperMock, Mockito.times(0)).toItemDto(any());
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -501,16 +474,12 @@ class ItemServiceImplTest {
 
         when(itemRepositoryMock.findById(itemId)).thenReturn(Optional.of(itemUpdate));
         when(itemRepositoryMock.save(itemUpdate)).thenReturn(itemUpdate);
-        when(mapperMock.toItem(itemDtoUpdate)).thenReturn(itemUpdate);
-        when(mapperMock.toItemDto(itemUpdate)).thenReturn(itemDtoUpdate);
 
         ItemDto itemDtoTest = itemService.updateItem(itemDtoUpdate, userId, itemId);
 
         assertEquals(itemDtoUpdate, itemDtoTest);
         Mockito.verify(itemRepositoryMock, Mockito.times(1)).findById(itemId);
         Mockito.verify(itemRepositoryMock, Mockito.times(1)).save(itemUpdate);
-        Mockito.verify(mapperMock, Mockito.times(1)).toItem(itemDtoUpdate);
-        Mockito.verify(mapperMock, Mockito.times(2)).toItemDto(itemUpdate);
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -529,8 +498,6 @@ class ItemServiceImplTest {
         assertEquals("itemId or userId", ex.getParameter());
         Mockito.verify(itemRepositoryMock, Mockito.times(0)).findById(any());
         Mockito.verify(itemRepositoryMock, Mockito.times(0)).save(any());
-        Mockito.verify(mapperMock, Mockito.times(0)).toItem(any());
-        Mockito.verify(mapperMock, Mockito.times(0)).toItemDto(any());
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -545,7 +512,6 @@ class ItemServiceImplTest {
 
         assertEquals(emptyList, itemDtoListTest);
         Mockito.verify(itemRepositoryMock, Mockito.times(0)).searchItems(any());
-        Mockito.verify(mapperMock, Mockito.times(0)).toItemDto(any());
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -554,14 +520,11 @@ class ItemServiceImplTest {
         String searchText = "ЛО";
 
         when(itemRepositoryMock.searchItems("ло")).thenReturn(itemList);
-        when(mapperMock.toItemDto(itemSave)).thenReturn(itemDtoSave);
-        when(mapperMock.toItemDto(itemSave2)).thenReturn(itemDtoSave2);
 
         List<ItemDto> itemDtoListTest = itemService.searchItems(searchText);
 
         assertEquals(itemDtoList, itemDtoListTest);
         Mockito.verify(itemRepositoryMock, Mockito.times(1)).searchItems(any());
-        Mockito.verify(mapperMock, Mockito.times(2)).toItemDto(any());
         Mockito.verifyNoMoreInteractions(itemRepositoryMock);
     }
 
@@ -573,7 +536,6 @@ class ItemServiceImplTest {
         when(bookingServiceMock.getBookingWithUserBookedItem(itemId, userId)).thenReturn(booking);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
         when(commentRepositoryMock.save(any())).thenReturn(comment);
-        when(mapperMock.toCommentDto(comment)).thenReturn(commentDto);
 
         CommentDto commentTest = itemService.saveComment(commentDto, itemId, userId);
 
@@ -581,7 +543,6 @@ class ItemServiceImplTest {
         Mockito.verify(bookingServiceMock, Mockito.times(1))
                 .getBookingWithUserBookedItem(itemId, userId);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
-        Mockito.verify(mapperMock, Mockito.times(1)).toCommentDto(comment);
         Mockito.verifyNoMoreInteractions(commentRepositoryMock);
     }
 
@@ -604,7 +565,6 @@ class ItemServiceImplTest {
         Mockito.verify(bookingServiceMock, Mockito.times(0))
                 .getBookingWithUserBookedItem(any(), any());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
-        Mockito.verify(mapperMock, Mockito.times(0)).toCommentDto(any());
         Mockito.verifyNoMoreInteractions(commentRepositoryMock);
     }
 
@@ -630,7 +590,6 @@ class ItemServiceImplTest {
         Mockito.verify(bookingServiceMock, Mockito.times(0))
                 .getBookingWithUserBookedItem(any(), any());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
-        Mockito.verify(mapperMock, Mockito.times(0)).toCommentDto(any());
         Mockito.verifyNoMoreInteractions(commentRepositoryMock);
     }
 
@@ -654,7 +613,6 @@ class ItemServiceImplTest {
         Mockito.verify(bookingServiceMock, Mockito.times(1))
                 .getBookingWithUserBookedItem(itemId, userId);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
-        Mockito.verify(mapperMock, Mockito.times(0)).toCommentDto(comment);
         Mockito.verifyNoMoreInteractions(commentRepositoryMock);
     }
 
@@ -665,32 +623,30 @@ class ItemServiceImplTest {
         List<CommentDto> commentDtoListTest = List.of(commentDto, commentDto2);
 
         when(commentRepositoryMock.findAllByItem_Id(any(), any())).thenReturn(commentList);
-        when(mapperMock.toCommentDto(comment)).thenReturn(commentDto);
-        when(mapperMock.toCommentDto(comment2)).thenReturn(commentDto2);
 
         List<CommentDto> commentTest = itemService.getCommentsByItemId(itemId);
 
         assertEquals(commentDtoListTest, commentTest);
         Mockito.verify(commentRepositoryMock, Mockito.times(1))
                 .findAllByItem_Id(itemId, Sort.by(Sort.Direction.DESC, "created"));
-        Mockito.verify(mapperMock, Mockito.times(2)).toCommentDto(any());
         Mockito.verifyNoMoreInteractions(commentRepositoryMock);
     }
 
     @Test
     void getItemsByRequestId_True_Test() {
         Long requestId = 1L;
+        Long itemId_1 = 1L;
+        Long itemId_2 = 2L;
 
         when(itemRepositoryMock.findAllByRequestId(any(), any())).thenReturn(itemList);
-        when(mapperMock.toItemDto(itemSave)).thenReturn(itemDtoSave);
-        when(mapperMock.toItemDto(itemSave2)).thenReturn(itemDtoSave2);
+        when(itemService.getCommentsByItemId(itemId_1)).thenReturn(commentDtoList);
+        when(itemService.getCommentsByItemId(itemId_2)).thenReturn(commentDtoList);
 
         List<ItemDto> itemDtoListTest = itemService.getItemsByRequestId(requestId);
 
         assertEquals(itemDtoList, itemDtoListTest);
         Mockito.verify(itemRepositoryMock, Mockito.times(1))
                 .findAllByRequestId(requestId, Sort.by(Sort.Direction.DESC, "id"));
-        Mockito.verify(mapperMock, Mockito.times(2)).toItemDto(any());
         Mockito.verifyNoMoreInteractions(commentRepositoryMock);
     }
 }

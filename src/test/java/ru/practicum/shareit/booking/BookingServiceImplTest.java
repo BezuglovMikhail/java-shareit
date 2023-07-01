@@ -41,16 +41,12 @@ import static ru.practicum.shareit.booking.BookingStatus.WAITING;
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class BookingServiceImplTest {
-
     @Mock
     private BookingRepository repositoryMock;
     @Mock
     private UserService userServiceMock;
     @Mock
     private ItemService itemServiceMock;
-    @Mock
-    private BookingMapper mapperMock;
-
     private BookingService bookingService;
 
     User user;
@@ -65,6 +61,7 @@ class BookingServiceImplTest {
     LocalDateTime start = LocalDateTime.now().plus(Period.ofDays(1));
     LocalDateTime end = LocalDateTime.now().plus(Period.ofDays(5));
     Booking booking;
+    Booking bookingSave;
     Booking bookingFalse;
     Booking bookingCansel;
     Booking bookingReject;
@@ -80,11 +77,72 @@ class BookingServiceImplTest {
     void setUp() {
         bookingService = new BookingServiceImpl(repositoryMock,
                 userServiceMock,
-                itemServiceMock,
-                mapperMock);
+                itemServiceMock);
+
+        itemDto = new ItemDto(
+                1L,
+                "Колотушка",
+                "Создаёт шум",
+                true,
+                2L,
+                null,
+                null,
+                null,
+                commentDtoList);
+
+        item = new Item(
+                1L,
+                "Колотушка",
+                "Создаёт шум",
+                true,
+                2L,
+                null);
+
+        itemDto2 = new ItemDto(
+                2L,
+                "Киянка",
+                "Деревянный молоток",
+                false,
+                2L,
+                1L,
+                null,
+                null,
+                commentDtoList);
+
+        itemDtoUpdate = new ItemDto(
+                1L,
+                "Колотушка",
+                "Почти сломана",
+                false,
+                1L,
+                null,
+                null,
+                null,
+                commentDtoList);
+
+
+        userDto = new UserDto(
+                1L,
+                "nameTest",
+                "test@mail.com"
+        );
+
+        user = new User(
+                1L,
+                "nameTest",
+                "test@mail.com"
+        );
 
         booking = new Booking(
                 1L,
+                start,
+                end,
+                item,
+                user,
+                BookingStatus.WAITING);
+
+        bookingSave = new Booking(
+                null,
                 start,
                 end,
                 item,
@@ -139,68 +197,6 @@ class BookingServiceImplTest {
                 start,
                 end);
 
-        item = new Item(
-                1L,
-                "Колотушка",
-                "Создаёт шум",
-                true,
-                2L,
-                null);
-
-        itemDto = new ItemDto(
-                1L,
-                "Колотушка",
-                "Создаёт шум",
-                true,
-                2L,
-                null,
-                null,
-                null,
-                commentDtoList);
-
-        itemDto2 = new ItemDto(
-                2L,
-                "Киянка",
-                "Деревянный молоток",
-                false,
-                2L,
-                1L,
-                null,
-                null,
-                commentDtoList);
-
-        itemDtoUpdate = new ItemDto(
-                1L,
-                "Колотушка",
-                "Почти сломана",
-                false,
-                1L,
-                null,
-                null,
-                null,
-                commentDtoList);
-
-        userDto = new UserDto(
-                1L,
-                "nameTest",
-                "test@mail.com"
-        );
-
-        user = new User(
-                1L,
-                "nameTest",
-                "test@mail.com"
-        );
-
-        booking = new Booking(
-                1L,
-                start,
-                end,
-                item,
-                user,
-                BookingStatus.WAITING
-        );
-
         bookingCansel = new Booking(
                 1L,
                 start,
@@ -228,18 +224,13 @@ class BookingServiceImplTest {
         when(repositoryMock.save(any())).thenReturn(booking);
         when(itemServiceMock.findById(itemId)).thenReturn(itemDto);
         when(userServiceMock.findByIdUser(bookerId)).thenReturn(userDto);
-        when(mapperMock.toBooking(bookingInputDtoSave, itemDto, userDto)).thenReturn(booking);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
 
         BookingDto bookingDtoTest = bookingService.save(bookingInputDtoSave, bookerId);
 
         assertEquals(bookingDtoSave, bookingDtoTest);
         Mockito.verify(itemServiceMock, Mockito.times(1)).findById(itemId);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(bookerId);
-        Mockito.verify(mapperMock, Mockito.times(1))
-                .toBooking(bookingInputDtoSave, itemDto, userDto);
-        Mockito.verify(repositoryMock, Mockito.times(1)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(1)).toBookingDto(booking);
+        Mockito.verify(repositoryMock, Mockito.times(1)).save(bookingSave);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -250,7 +241,6 @@ class BookingServiceImplTest {
 
         when(itemServiceMock.findById(itemId)).thenReturn(itemDto);
         when(userServiceMock.findByIdUser(bookerId)).thenReturn(userDto);
-        when(mapperMock.toBooking(bookingInputDtoSave, itemDto, userDto)).thenReturn(booking);
 
         NotFoundException ex = assertThrows(NotFoundException.class, new Executable() {
             @Override
@@ -262,10 +252,7 @@ class BookingServiceImplTest {
         assertEquals("Owner can`t create booking his item!", ex.getMessage());
         Mockito.verify(itemServiceMock, Mockito.times(1)).findById(itemId);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(bookerId);
-        Mockito.verify(mapperMock, Mockito.times(1))
-                .toBooking(bookingInputDtoSave, itemDto, userDto);
         Mockito.verify(repositoryMock, Mockito.times(0)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(booking);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -287,13 +274,9 @@ class BookingServiceImplTest {
         assertEquals("Item whit с id = 1 not found in database.", ex.getMessage());
         Mockito.verify(itemServiceMock, Mockito.times(1)).findById(itemId);
         Mockito.verify(userServiceMock, Mockito.times(0)).findByIdUser(bookerId);
-        Mockito.verify(mapperMock, Mockito.times(0))
-                .toBooking(bookingInputDtoSave, itemDto, userDto);
         Mockito.verify(repositoryMock, Mockito.times(0)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(booking);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
-
 
     @Test
     void save_False_NotFoundUser_Test() {
@@ -314,10 +297,7 @@ class BookingServiceImplTest {
         assertEquals("User whit id = 100 not found in database.", ex.getMessage());
         Mockito.verify(itemServiceMock, Mockito.times(1)).findById(itemId);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(bookerId);
-        Mockito.verify(mapperMock, Mockito.times(0))
-                .toBooking(bookingInputDtoSave, itemDto, userDto);
         Mockito.verify(repositoryMock, Mockito.times(0)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(booking);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -339,10 +319,7 @@ class BookingServiceImplTest {
         assertEquals("available (that item already booking)", ex.getParameter());
         Mockito.verify(itemServiceMock, Mockito.times(1)).findById(itemId);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(bookerId);
-        Mockito.verify(mapperMock, Mockito.times(0))
-                .toBooking(bookingInputDtoSave, itemDto, userDto);
         Mockito.verify(repositoryMock, Mockito.times(0)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(booking);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -369,10 +346,7 @@ class BookingServiceImplTest {
         assertEquals("start or end", ex.getParameter());
         Mockito.verify(itemServiceMock, Mockito.times(1)).findById(itemId);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(bookerId);
-        Mockito.verify(mapperMock, Mockito.times(0))
-                .toBooking(bookingInputDtoSave, itemDto, userDto);
         Mockito.verify(repositoryMock, Mockito.times(0)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(booking);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -399,10 +373,7 @@ class BookingServiceImplTest {
         assertEquals("start or end", ex.getParameter());
         Mockito.verify(itemServiceMock, Mockito.times(1)).findById(itemId);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(bookerId);
-        Mockito.verify(mapperMock, Mockito.times(0))
-                .toBooking(bookingInputDtoSave, itemDto, userDto);
         Mockito.verify(repositoryMock, Mockito.times(0)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(booking);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -429,10 +400,8 @@ class BookingServiceImplTest {
         assertEquals("start or end", ex.getParameter());
         Mockito.verify(itemServiceMock, Mockito.times(1)).findById(itemId);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(bookerId);
-        Mockito.verify(mapperMock, Mockito.times(0))
-                .toBooking(bookingInputDtoSave, itemDto, userDto);
+
         Mockito.verify(repositoryMock, Mockito.times(0)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(booking);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -459,10 +428,7 @@ class BookingServiceImplTest {
         assertEquals("start or end", ex.getParameter());
         Mockito.verify(itemServiceMock, Mockito.times(1)).findById(itemId);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(bookerId);
-        Mockito.verify(mapperMock, Mockito.times(0))
-                .toBooking(bookingInputDtoSave, itemDto, userDto);
         Mockito.verify(repositoryMock, Mockito.times(0)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(booking);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -489,13 +455,9 @@ class BookingServiceImplTest {
         assertEquals("start or end", ex.getParameter());
         Mockito.verify(itemServiceMock, Mockito.times(1)).findById(itemId);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(bookerId);
-        Mockito.verify(mapperMock, Mockito.times(0))
-                .toBooking(bookingInputDtoSave, itemDto, userDto);
         Mockito.verify(repositoryMock, Mockito.times(0)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(booking);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
-
 
     @Test
     void update_True_BookingStatus_APPROVED_Test() {
@@ -506,14 +468,12 @@ class BookingServiceImplTest {
         when(repositoryMock.save(any())).thenReturn(bookingUpdate);
         when(repositoryMock.findById(bookingId)).thenReturn(Optional.of(booking));
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(bookingUpdate)).thenReturn(bookingDtoUpdate);
 
         BookingDto bookingDtoTest = bookingService.update(bookingId, userId, approved);
 
         assertEquals(bookingDtoUpdate, bookingDtoTest);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(1)).toBookingDto(bookingUpdate);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -526,14 +486,12 @@ class BookingServiceImplTest {
         when(repositoryMock.save(any())).thenReturn(bookingCansel);
         when(repositoryMock.findById(bookingId)).thenReturn(Optional.of(booking));
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
 
         BookingDto bookingDtoTest = bookingService.update(bookingId, userId, approved);
 
         assertEquals(bookingDtoUpdate2, bookingDtoTest);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1)).save(bookingCansel);
-        Mockito.verify(mapperMock, Mockito.times(1)).toBookingDto(bookingCansel);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -546,14 +504,12 @@ class BookingServiceImplTest {
         when(repositoryMock.save(any())).thenReturn(bookingReject);
         when(repositoryMock.findById(bookingId)).thenReturn(Optional.of(booking));
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
 
         BookingDto bookingDtoTest = bookingService.update(bookingId, userId, approved);
 
         assertEquals(bookingDtoUpdate3, bookingDtoTest);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1)).save(bookingReject);
-        Mockito.verify(mapperMock, Mockito.times(1)).toBookingDto(bookingReject);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -576,7 +532,6 @@ class BookingServiceImplTest {
         assertEquals("User whit id = 100 not found in database.", ex.getMessage());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(0)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(bookingUpdate);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -600,7 +555,6 @@ class BookingServiceImplTest {
         assertEquals("Booking whit id = 100 not found in database.", ex.getMessage());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(0)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(bookingUpdate);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -631,7 +585,6 @@ class BookingServiceImplTest {
         assertEquals("Time of booking is finish!", ex.getMessage());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(0)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(bookingUpdate);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -654,7 +607,6 @@ class BookingServiceImplTest {
         assertEquals("User whit id = 1 hav`t this item!", ex.getMessage());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(0)).save(booking);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(bookingUpdate);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -687,7 +639,6 @@ class BookingServiceImplTest {
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1)).findById(any());
         Mockito.verify(repositoryMock, Mockito.times(0)).save(any());
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -698,14 +649,12 @@ class BookingServiceImplTest {
 
         when(repositoryMock.findById(bookingId)).thenReturn(Optional.of(booking));
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
 
         BookingDto bookingDtoTest = bookingService.getBookingById(bookingId, userId);
 
         assertEquals(bookingDtoSave, bookingDtoTest);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1)).findById(bookingId);
-        Mockito.verify(mapperMock, Mockito.times(1)).toBookingDto(booking);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -716,14 +665,12 @@ class BookingServiceImplTest {
 
         when(repositoryMock.findById(bookingId)).thenReturn(Optional.of(booking));
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
 
         BookingDto bookingDtoTest = bookingService.getBookingById(bookingId, userId);
 
         assertEquals(bookingDtoSave, bookingDtoTest);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1)).findById(bookingId);
-        Mockito.verify(mapperMock, Mockito.times(1)).toBookingDto(booking);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -745,7 +692,6 @@ class BookingServiceImplTest {
         assertEquals("User whit id = 100 not found in database.", ex.getMessage());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(0)).findById(bookingId);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(booking);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -768,7 +714,6 @@ class BookingServiceImplTest {
         assertEquals("Booking whit id = 100 not found in database.", ex.getMessage());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1)).findById(bookingId);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(booking);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -790,7 +735,6 @@ class BookingServiceImplTest {
         assertEquals("User whit id = 3 hav`t this item!", ex.getMessage());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1)).findById(bookingId);
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(booking);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -808,16 +752,12 @@ class BookingServiceImplTest {
 
         when(repositoryMock.findByBookerId(userId, pageable)).thenReturn(bookingPage);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
-        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
-        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
 
         List<BookingDto> bookingDtoListTest = bookingService.getBookings(state, userId, from, size);
 
         assertEquals(bookingDtoList, bookingDtoListTest);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1)).findByBookerId(userId, pageable);
-        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -835,16 +775,12 @@ class BookingServiceImplTest {
 
         when(repositoryMock.findByBookerId(userId, pageable)).thenReturn(bookingPage);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
-        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
-        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
 
         List<BookingDto> bookingDtoListTest = bookingService.getBookings(state, userId, from, size);
 
         assertEquals(bookingDtoList, bookingDtoListTest);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1)).findByBookerId(userId, pageable);
-        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -863,17 +799,13 @@ class BookingServiceImplTest {
         when(repositoryMock.findByBookerIdAndStartIsBeforeAndEndIsAfter(any(), any(),
                 any(), any())).thenReturn(bookingPage);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
-        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
-        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
 
         List<BookingDto> bookingDtoListTest = bookingService.getBookings(state, userId, from, size);
 
         assertEquals(bookingDtoList, bookingDtoListTest);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1))
-                .findByBookerIdAndStartIsBeforeAndEndIsAfter(any(),  any(), any(), any());
-        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
+                .findByBookerIdAndStartIsBeforeAndEndIsAfter(any(), any(), any(), any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -891,9 +823,6 @@ class BookingServiceImplTest {
 
         when(repositoryMock.findByBookerIdAndEndIsBefore(any(), any(), any())).thenReturn(bookingPage);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
-        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
-        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
 
         List<BookingDto> bookingDtoListTest = bookingService.getBookings(state, userId, from, size);
 
@@ -901,7 +830,6 @@ class BookingServiceImplTest {
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1))
                 .findByBookerIdAndEndIsBefore(any(), any(), any());
-        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -919,9 +847,6 @@ class BookingServiceImplTest {
 
         when(repositoryMock.findByBookerIdAndStartIsAfter(any(), any(), any())).thenReturn(bookingPage);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
-        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
-        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
 
         List<BookingDto> bookingDtoListTest = bookingService.getBookings(state, userId, from, size);
 
@@ -929,7 +854,6 @@ class BookingServiceImplTest {
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1))
                 .findByBookerIdAndStartIsAfter(any(), any(), any());
-        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -947,7 +871,6 @@ class BookingServiceImplTest {
 
         when(repositoryMock.findByBookerIdAndStatus(userId, WAITING, pageable)).thenReturn(bookingPage);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
 
         List<BookingDto> bookingDtoListTest = bookingService.getBookings(state, userId, from, size);
 
@@ -955,7 +878,6 @@ class BookingServiceImplTest {
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1))
                 .findByBookerIdAndStatus(userId, WAITING, pageable);
-        Mockito.verify(mapperMock, Mockito.times(1)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -973,7 +895,6 @@ class BookingServiceImplTest {
 
         when(repositoryMock.findByBookerIdAndStatus(userId, REJECTED, pageable)).thenReturn(bookingPage);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
 
         List<BookingDto> bookingDtoListTest = bookingService.getBookings(state, userId, from, size);
 
@@ -981,7 +902,6 @@ class BookingServiceImplTest {
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1))
                 .findByBookerIdAndStatus(userId, REJECTED, pageable);
-        Mockito.verify(mapperMock, Mockito.times(1)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -1005,7 +925,6 @@ class BookingServiceImplTest {
         assertEquals("User whit id = 100 not found in database.", ex.getMessage());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(0)).findByBookerId(any(), any());
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -1028,7 +947,6 @@ class BookingServiceImplTest {
         assertEquals(state, ex.getParameter());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(0)).findByBookerId(any(), any());
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -1051,7 +969,6 @@ class BookingServiceImplTest {
         assertEquals(state, ex.getParameter());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(0)).findByBookerId(any(), any());
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -1069,16 +986,12 @@ class BookingServiceImplTest {
 
         when(repositoryMock.findByItem_Owner(userId, pageable)).thenReturn(bookingPage);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
-        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
-        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
 
         List<BookingDto> bookingDtoListTest = bookingService.getBookingsOwner(state, userId, from, size);
 
         assertEquals(bookingDtoList, bookingDtoListTest);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1)).findByItem_Owner(userId, pageable);
-        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -1096,16 +1009,12 @@ class BookingServiceImplTest {
 
         when(repositoryMock.findByItem_Owner(userId, pageable)).thenReturn(bookingPage);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
-        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
-        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
 
         List<BookingDto> bookingDtoListTest = bookingService.getBookingsOwner(state, userId, from, size);
 
         assertEquals(bookingDtoList, bookingDtoListTest);
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1)).findByItem_Owner(userId, pageable);
-        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -1121,9 +1030,6 @@ class BookingServiceImplTest {
         when(repositoryMock
                 .findByItem_OwnerAndStartIsBeforeAndEndIsAfter(any(), any(), any(), any())).thenReturn(bookingPage);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
-        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
-        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
 
         List<BookingDto> bookingDtoListTest = bookingService.getBookingsOwner(state, userId, from, size);
 
@@ -1131,7 +1037,6 @@ class BookingServiceImplTest {
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1))
                 .findByItem_OwnerAndStartIsBeforeAndEndIsAfter(any(), any(), any(), any());
-        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -1146,9 +1051,6 @@ class BookingServiceImplTest {
 
         when(repositoryMock.findByItem_OwnerAndEndIsBefore(any(), any(), any())).thenReturn(bookingPage);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
-        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
-        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
 
         List<BookingDto> bookingDtoListTest = bookingService.getBookingsOwner(state, userId, from, size);
 
@@ -1156,7 +1058,6 @@ class BookingServiceImplTest {
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1))
                 .findByItem_OwnerAndEndIsBefore(any(), any(), any());
-        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -1171,9 +1072,6 @@ class BookingServiceImplTest {
 
         when(repositoryMock.findByItem_OwnerAndStartIsAfter(any(), any(), any())).thenReturn(bookingPage);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
-        when(mapperMock.toBookingDto(bookingCansel)).thenReturn(bookingDtoUpdate2);
-        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
 
         List<BookingDto> bookingDtoListTest = bookingService.getBookingsOwner(state, userId, from, size);
 
@@ -1181,7 +1079,6 @@ class BookingServiceImplTest {
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1))
                 .findByItem_OwnerAndStartIsAfter(any(), any(), any());
-        Mockito.verify(mapperMock, Mockito.times(3)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -1199,7 +1096,6 @@ class BookingServiceImplTest {
 
         when(repositoryMock.findByItem_OwnerAndStatus(userId, WAITING, pageable)).thenReturn(bookingPage);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(booking)).thenReturn(bookingDtoSave);
 
         List<BookingDto> bookingDtoListTest = bookingService.getBookingsOwner(state, userId, from, size);
 
@@ -1207,7 +1103,6 @@ class BookingServiceImplTest {
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1))
                 .findByItem_OwnerAndStatus(userId, WAITING, pageable);
-        Mockito.verify(mapperMock, Mockito.times(1)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -1225,7 +1120,6 @@ class BookingServiceImplTest {
 
         when(repositoryMock.findByItem_OwnerAndStatus(userId, REJECTED, pageable)).thenReturn(bookingPage);
         when(userServiceMock.findByIdUser(userId)).thenReturn(userDto);
-        when(mapperMock.toBookingDto(bookingReject)).thenReturn(bookingDtoUpdate3);
 
         List<BookingDto> bookingDtoListTest = bookingService.getBookingsOwner(state, userId, from, size);
 
@@ -1233,7 +1127,6 @@ class BookingServiceImplTest {
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(1))
                 .findByItem_OwnerAndStatus(userId, REJECTED, pageable);
-        Mockito.verify(mapperMock, Mockito.times(1)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -1257,7 +1150,6 @@ class BookingServiceImplTest {
         assertEquals("User whit id = 100 not found in database.", ex.getMessage());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(0)).findByItem_Owner(any(), any());
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -1280,7 +1172,6 @@ class BookingServiceImplTest {
         assertEquals(state, ex.getParameter());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(0)).findByItem_Owner(any(), any());
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
@@ -1303,20 +1194,6 @@ class BookingServiceImplTest {
         assertEquals(state, ex.getParameter());
         Mockito.verify(userServiceMock, Mockito.times(1)).findByIdUser(userId);
         Mockito.verify(repositoryMock, Mockito.times(0)).findByItem_Owner(any(), any());
-        Mockito.verify(mapperMock, Mockito.times(0)).toBookingDto(any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
-    }
-
-    @Test
-    void getLastBooking() {
-
-    }
-
-    @Test
-    void getNextBooking() {
-    }
-
-    @Test
-    void getBookingWithUserBookedItem() {
     }
 }

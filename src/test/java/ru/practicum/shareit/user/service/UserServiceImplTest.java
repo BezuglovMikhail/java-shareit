@@ -14,7 +14,6 @@ import ru.practicum.shareit.exeption.IncorrectParameterException;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.exeption.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -25,34 +24,25 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static ru.practicum.shareit.user.dto.UserMapper.toUser;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
-
     private UserService userService;
-
-    private UserMapper userMapper = new UserMapper();
-
     @Mock
     private UserRepository userRepositoryMock;
-
     private UserDto userDto;
     private UserDto userDtoFalse;
-
     private User userSave;
-
     private List<User> users;
-
     private UserDto userDtoUpdate;
-
     private List<UserDto> usersDto;
-
     private User userUpdate;
 
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userRepositoryMock, userMapper);
+        userService = new UserServiceImpl(userRepositoryMock);
 
         userSave = new User(
                 1L,
@@ -138,7 +128,7 @@ class UserServiceImplTest {
 
         Assertions.assertEquals("email", ex.getParameter());
         Mockito.verify(userRepositoryMock, Mockito.times(0))
-                .save(userMapper.toUser(userDtoFalse));
+                .save(toUser(userDtoFalse));
         Mockito.verifyNoMoreInteractions(userRepositoryMock);
     }
 
@@ -160,7 +150,7 @@ class UserServiceImplTest {
 
         Assertions.assertEquals("email", ex.getParameter());
         Mockito.verify(userRepositoryMock, Mockito.times(0))
-                .save(userMapper.toUser(userDtoFalse));
+                .save(toUser(userDtoFalse));
         Mockito.verifyNoMoreInteractions(userRepositoryMock);
     }
 
@@ -183,7 +173,7 @@ class UserServiceImplTest {
         Assertions.assertEquals("That user`s email = " + userDto.getEmail() + " exists in database!",
                 exception.getMessage());
         Mockito.verify(userRepositoryMock, Mockito.times(1))
-                .save(userMapper.toUser(userDto));
+                .save(toUser(userDto));
         Mockito.verifyNoMoreInteractions(userRepositoryMock);
     }
 

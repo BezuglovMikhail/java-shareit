@@ -3,18 +3,16 @@ package ru.practicum.shareit.booking;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -23,18 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class BookingMapperTest {
-
-    @Mock
-    private ItemMapper itemMapperMock;
-
-    @Mock
-    private UserMapper userMapperMock;
 
     BookingMapper mapper;
 
@@ -56,7 +46,6 @@ class BookingMapperTest {
 
     @BeforeEach
     void setUp() {
-        mapper = new BookingMapper(itemMapperMock, userMapperMock);
 
         itemSave = new Item(
                 1L,
@@ -148,12 +137,11 @@ class BookingMapperTest {
     @Test
     void toBookingDto() {
 
-        when(itemMapperMock.toItemDto(any())).thenReturn(itemDto);
-        when(userMapperMock.toUserDto(any())).thenReturn(userDto);
-
-        BookingDto bookingDtoTest = mapper.toBookingDto(booking);
+        BookingDto bookingDtoTest = mapper.toBookingDto(booking, itemDto, userDto);
 
         assertEquals(bookingDto, bookingDtoTest);
+
+
     }
 
     @Test
@@ -166,10 +154,8 @@ class BookingMapperTest {
 
     @Test
     void toBooking() {
-        when(itemMapperMock.toItem(any())).thenReturn(item);
-        when(userMapperMock.toUser(any())).thenReturn(user);
 
-        Booking bookingTest = mapper.toBooking(bookingInputDto, itemDto, userDto);
+        Booking bookingTest = mapper.toBooking(bookingInputDto, item, user);
 
         assertEquals(bookingSave, bookingTest);
     }
