@@ -69,11 +69,8 @@ public class Validator {
     }
 
     public static boolean validatorItemOwner(Long ownerId, Long userId) {
-        if (ownerId == null) {
-            throw new NotFoundException("User whit id = " + userId + " don`t have items.");
-        }
         if (!Objects.equals(ownerId, userId)) {
-            throw new NotFoundException("Only the owner of the item can APPROVED the booking!");
+            throw new NotFoundException("User whit id = " + userId + " hav`t this item!");
         }
         return true;
     }
@@ -81,6 +78,18 @@ public class Validator {
     public static void validatorComment(String text) {
         if (text == null || text.isBlank()) {
             throw new IncorrectParameterException("text");
+        }
+    }
+
+    public static void validatorRequestDescription(String text) {
+        if (text == null || text.isBlank()) {
+            throw new IncorrectParameterException("description");
+        }
+    }
+
+    public static void validatorRequestSize(Integer size) {
+        if (size <= 0) {
+            throw new IncorrectParameterException("size");
         }
     }
 }

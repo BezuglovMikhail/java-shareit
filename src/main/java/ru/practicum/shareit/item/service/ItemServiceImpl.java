@@ -10,7 +10,6 @@ import ru.practicum.shareit.exeption.IncorrectParameterException;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
@@ -22,6 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static ru.practicum.shareit.item.dto.ItemMapper.*;
 import static ru.practicum.shareit.validator.Validator.*;
 
 @Service
@@ -36,19 +36,15 @@ public class ItemServiceImpl implements ItemService {
     private final UserService userService;
     @Autowired
     private final BookingService bookingService;
-    @Autowired
-    private final ItemMapper mapper;
 
     public ItemServiceImpl(ItemRepository itemRepository,
                            CommentRepository commentRepository,
                            UserService userService,
-                           BookingService bookingService,
-                           ItemMapper mapper) {
+                           BookingService bookingService) {
         this.itemRepository = itemRepository;
         this.commentRepository = commentRepository;
         this.userService = userService;
         this.bookingService = bookingService;
-        this.mapper = mapper;
     }
 
     @Override
@@ -56,8 +52,8 @@ public class ItemServiceImpl implements ItemService {
         validatorItem(itemDto);
         userService.findByIdUser(userId);
         itemDto.setOwner(userId);
-        Item item = itemRepository.save(mapper.toItem(itemDto));
-        return mapper.toItemDto(item);
+        Item item = itemRepository.save(toItem(itemDto));
+        return toItemDto(item, getCommentsByItemId(item.getId()));
     }
 
     @Override
@@ -81,7 +77,7 @@ public class ItemServiceImpl implements ItemService {
             Optional<Item> item = itemRepository.findById(itemId);
 
             if (item.isPresent()) {
-                return mapper.toItemDto(item.get());
+                return toItemDto(item.get(), getCommentsByItemId(itemId));
             } else {
                 throw new NotFoundException("Item whit с id = " + itemId + " not found in database.");
             }
@@ -98,12 +94,12 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NotFoundException("Item whit с id = " + id + " not found in database."));
         if (userId.equals(item.getOwner())) {
 
-            itemDto = mapper.toItemExtDto(item,
+            itemDto = toItemExtDto(item,
                     bookingService.getLastBooking(item.getId()),
                     bookingService.getNextBooking(item.getId()),
                     getCommentsByItemId(item.getId()));
         } else {
-            itemDto = mapper.toItemDto(item);
+            itemDto = toItemDto(item, getCommentsByItemId(id));
         }
 
         return itemDto;
@@ -132,7 +128,7 @@ public class ItemServiceImpl implements ItemService {
                 itemUpdate.setAvailable(itemDto.getAvailable());
             }
 
-            return mapper.toItemDto(itemRepository.save(mapper.toItem(itemUpdate)));
+            return toItemDto(itemRepository.save(toItem(itemUpdate)), getCommentsByItemId(itemId));
         } else {
             throw new IncorrectParameterException("itemId or userId");
         }
@@ -140,7 +136,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> searchItems(String text) {
-        if (text.isBlank() || text == null) {
+        if (text.isBlank()) {
             List<ItemDto> itemsClear = new ArrayList<>();
             return itemsClear;
         }
@@ -148,7 +144,7 @@ public class ItemServiceImpl implements ItemService {
         text = text.toLowerCase();
         List<Item> items = itemRepository.searchItems(text);
 
-        return items.stream().map(x -> mapper.toItemDto(x)).collect(Collectors.toList());
+        return items.stream().map(x -> toItemDto(x, getCommentsByItemId(x.getId()))).collect(Collectors.toList());
     }
 
     @Override
@@ -156,15 +152,23 @@ public class ItemServiceImpl implements ItemService {
         validatorCreateComment(userId, commentDto.getText());
         Comment comment = createComment(itemId, userId, commentDto.getText());
 
-        return mapper.toCommentDto(commentRepository.save(comment));
+        return toCommentDto(commentRepository.save(comment));
     }
 
     @Override
     public List<CommentDto> getCommentsByItemId(Long itemId) {
         return commentRepository.findAllByItem_Id(itemId,
                         Sort.by(Sort.Direction.DESC, "created")).stream()
-                .map(mapper::toCommentDto)
+                .map(x -> toCommentDto(x))
                 .collect(toList());
+    }
+
+    @Override
+    public List<ItemDto> getItemsByRequestId(Long requestId) {
+        return itemRepository.findAllByRequestId(requestId,
+                        Sort.by(Sort.Direction.DESC, "id")).stream()
+                .map(x -> toItemDto(x, getCommentsByItemId(x.getId())))
+                .collect(Collectors.toList());
     }
 
     public void validatorCreateComment(Long userId, String textComment) {

@@ -10,12 +10,13 @@ import ru.practicum.shareit.item.service.ItemService;
 import javax.validation.Valid;
 import java.util.List;
 
+import static ru.practicum.shareit.user.Constant.USER_ID;
+
 @RestController
 @RequestMapping("/items")
 @Slf4j
 public class ItemController {
 
-    private static final String OWNER = "X-Sharer-User-Id";
     @Autowired
     private final ItemService itemService;
 
@@ -24,15 +25,15 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getAllItemByIdUser(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDto> getAllItemByIdUser(@RequestHeader(USER_ID) Long userId) {
         List<ItemDto> allItemsByIdUser = itemService.findAllItemByIdUser(userId);
         log.info("Request Get received to list items user`s whit id = {}, size find items = {}.",
                 userId, allItemsByIdUser.size());
-        return itemService.findAllItemByIdUser(userId);
+        return allItemsByIdUser;
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable Long itemId, @RequestHeader(OWNER) Long ownerId) {
+    public ItemDto getItemById(@PathVariable Long itemId, @RequestHeader(USER_ID) Long ownerId) {
         ItemDto findItem = itemService.getItemById(itemId, ownerId);
         log.info("Request Get received to item " + findItem);
         return findItem;
@@ -45,8 +46,8 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto saveUser(@Valid @RequestBody ItemDto itemDto,
-                            @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ItemDto saveItem(@Valid @RequestBody ItemDto itemDto,
+                            @RequestHeader(USER_ID) Long userId) {
         ItemDto addItem = itemService.save(itemDto, userId);
         log.info("Request Post received to add item user`s whit id = {}", userId);
         return addItem;
@@ -54,7 +55,7 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@Valid @RequestBody ItemDto itemDto,
-                          @RequestHeader("X-Sharer-User-Id") long userId,
+                          @RequestHeader(USER_ID) long userId,
                           @PathVariable Long itemId) {
         ItemDto updateItem = itemService.updateItem(itemDto, userId, itemId);
         log.info("Request Update received to update item whit id = {} user whit id = {}", updateItem.getId(), userId);
@@ -62,15 +63,15 @@ public class ItemController {
     }
 
     @DeleteMapping("/{itemId}")
-    public void deleteUser(@PathVariable long itemId,
-                           @RequestHeader("X-Sharer-User-Id") long userId) {
+    public void deleteItem(@PathVariable long itemId,
+                           @RequestHeader(USER_ID) long userId) {
         itemService.deleteItem(itemId, userId);
         log.info("Request Delete received to delete item whit id = {} user whit id = {}", itemId, userId);
     }
 
     @ResponseBody
     @PostMapping("/{itemId}/comment")
-    public CommentDto createComment(@RequestBody CommentDto commentDto, @RequestHeader(OWNER) Long userId,
+    public CommentDto createComment(@RequestBody CommentDto commentDto, @RequestHeader(USER_ID) Long userId,
                                     @PathVariable Long itemId) {
         log.info("Request Post received to add comment by user whit id = {}", userId);
         return itemService.saveComment(commentDto, itemId, userId);
