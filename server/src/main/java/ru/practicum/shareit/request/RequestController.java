@@ -24,7 +24,7 @@ public class RequestController {
     @ResponseBody
     @PostMapping
     public RequestDto create(@RequestBody RequestDto requestDto,
-                                 @RequestHeader(USER_ID) Long creatorRequestId) {
+                             @RequestHeader(USER_ID) Long creatorRequestId) {
         log.info("Request Post received to add item by request whit id  = {}", creatorRequestId);
         return service.create(requestDto, creatorRequestId, LocalDateTime.now());
     }
@@ -43,8 +43,9 @@ public class RequestController {
 
     @GetMapping("/all")
     public List<RequestDto> getAllItemRequests(@RequestHeader(USER_ID) Long userId,
-                                                   @RequestParam(defaultValue = "0") Integer from,
-                                                   @RequestParam(required = false) Integer size) {
+                                               @RequestParam(defaultValue = "0") Integer from,
+                                               @RequestParam(required = false) Integer size) {
         log.info("Request GET received to request to list all requests. User`s id = {}", userId);
         return service.getAllRequests(userId, from, size);
-    }}
+    }
+}
