@@ -177,7 +177,6 @@ public class BookingServiceImpl implements BookingService {
             default:
                 throw new IncorrectParameterException(state);
         }
-
         return page;
     }
 
@@ -270,7 +269,6 @@ public class BookingServiceImpl implements BookingService {
             default:
                 throw new IncorrectParameterException(state);
         }
-
         return page;
     }
 

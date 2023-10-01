@@ -1,2 +1,4 @@
 # java-shareit
-Template repository for Shareit project.
+## Это репозиторий проекта "ShareIt".
+
+Приложение **умеет**:

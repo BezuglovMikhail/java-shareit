@@ -22,7 +22,6 @@ import static ru.practicum.shareit.user.Constant.USER_ID;
 public class ItemController {
     private final ItemClient itemClient;
 
-
     @GetMapping
     public ResponseEntity<Object> getItemsByOwner(@RequestHeader(USER_ID) Long ownerId,
                                                   @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
